@@ -1,0 +1,7 @@
+import 'package:cosmospedia/src/core/service_locator.dart';
+import 'package:cosmospedia/src/data/network/data_source/api_service.dart';
+import 'package:cosmospedia/src/data/network/dio_client.dart';
+
+class SpaceFlightApiService extends ApiService{
+  SpaceFlightApiService():super(getIt<DioClient>(instanceName:'spaceClient'));
+}
