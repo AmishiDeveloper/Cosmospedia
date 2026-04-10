@@ -1,6 +1,7 @@
 import 'package:cosmospedia/src/core/app_themes/app_colors.dart';
 import 'package:cosmospedia/src/core/app_themes/text_styles.dart';
 import 'package:cosmospedia/src/data/model/asteroid_model/asteroid_feed_model.dart';
+import 'package:cosmospedia/src/data/model/asteroid_model/asteroid_lookup_model.dart';
 import 'package:cosmospedia/src/logic/cubits/asteroids_cubits/asteroid_detail_cubit.dart';
 import 'package:cosmospedia/src/presentation/screens/asteroids_screens/asteroid_detail_screen/asteroid_physical_properties_screeen.dart';
 import 'package:cosmospedia/src/presentation/screens/asteroids_screens/asteroid_detail_screen/asteroid_timeline_view_screen.dart';
@@ -25,6 +26,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 // body: Yahan aapka TabBarView aayega.
 
 class AsteroidDetailScreen extends StatefulWidget {
+  // all data coming from feed api about asteroid
   final String asteroidId;
   final String name;
   final bool isHazardous;
@@ -50,13 +52,13 @@ class _AsteroidDetailScreenState extends State<AsteroidDetailScreen> {
     // TODO: implement initState
     super.initState();
 
-    // Widget build hone ke turant baad chalega
+    // Widget build hone ke turant baad chalega aur api hit hogi
     WidgetsBinding.instance.addPostFrameCallback((_) {
       //final int asteroidId = int.tryParse(widget.asteroidId) ?? 0;
 
       if (context.mounted) {
         context.read<AsteroidDetailCubit>().fetchAsteroidLookupData(
-          asteroidId: widget.asteroidId,//asteroidId,
+          asteroidId: widget.asteroidId, //asteroidId,
         );
       }
     });
@@ -262,37 +264,22 @@ class _AsteroidDetailScreenState extends State<AsteroidDetailScreen> {
                     TabBarView(
                       physics: const BouncingScrollPhysics(),
                       children: [
+                        // Tab 1 Content
                         widget.asteroid != null
                             ? AsteroidPhysicalPropertiesScreen(
-                          asteroid: widget.asteroid!,
-                          //lookupModel: state.lookupModel,
-                        ):const Center(child: Text("Data Missing")),
-                        // Tab 1 Content
+                                asteroid: widget.asteroid!,
+                                //lookupModel: state.lookupModel,
+                              )
+                            : const Center(child: Text("Data Missing"),),
 
-                        BlocBuilder<AsteroidDetailCubit, AsteroidDetailState>(
-                          builder: (context, state) {
-                            if (state is AsteroidDetailLoadingState) {
-                              return const Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            } else if (state is AsteroidDetailErrorState) {
-                              return Center(child: Text(state.errorMessage));
-                            } else if (state is AsteroidDetailSuccessState) {
-                              return AsteroidTimelineViewScreen(
-                                lookupModel: state.lookupModel,
-                              );
-                              // Tab 2 Content
-                            }
-                            return const SizedBox();
-                          },
+                        // Tab 2 Content
+                        AsteroidTimelineViewScreen(
+                          lookupModel: AsteroidLookUpModel(
+                            id: widget.asteroidId,
+                          ), //state.lookupModel,
                         ),
                       ],
                     ),
-                //}
-                //return const SizedBox();;
-                //},
-                //),
-                //),
               ),
             ),
           ),

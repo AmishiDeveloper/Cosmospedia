@@ -145,8 +145,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               return 'Username is required';
                             }
                             if (!RegularExpressions.usernameRegex.hasMatch(
-                              value,
-                            )) {
+                              value)) {
                               return 'username must be 6-20 character long with no special character.';
                             }
                             return null;

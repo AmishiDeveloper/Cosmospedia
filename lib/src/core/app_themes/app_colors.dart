@@ -31,6 +31,7 @@ class AppColors {
   static const Color textPrimaryDark = Color(0xFFE0E0E0);
   static const Color textSecondaryDark = Color(0xFF9E9E9E);
   static const Color textDeepPurple= Color(0xFF673AB7);
+  static const Color textPurple= Color(0xFF9C20B7);
 
   //Shimmer colors
   static const Color greyShimmerShade50 = Color(0xFFFAFAFA);
@@ -57,6 +58,7 @@ class AppColors {
 
   // Warning Colors
   static const Color warning = Color(0xFFFFA000);
+  static const Color orange = Color(0xFFFF9800);
   static const Color warningDark = Color(0xFFFFB74D);
   static const Color yellow = Color(0xFFFFEB35);
 

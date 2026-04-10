@@ -50,7 +50,7 @@ class _AnimatedOrbitWidgetState extends State<AnimatedOrbitWidget>
           children: [
             Container(
               width: constraints.maxWidth,
-              height: 570.h,
+              height: 589.h,
               padding: EdgeInsets.all(16.h),
               //drawerHeaderGradient.withOpacity(0.4),
               //splashBlueBackground, drawerHeader
@@ -126,8 +126,8 @@ class _AnimatedOrbitWidgetState extends State<AnimatedOrbitWidget>
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: widget.isHazardous
-                            ? Colors.red.withOpacity(0.3)
-                            : Colors.green.withOpacity(0.3),
+                            ? AppColors.error.withOpacity(0.3)
+                            : AppColors.success.withOpacity(0.3),
                       ),
                     ),
                     child: Row(
@@ -155,6 +155,7 @@ class _AnimatedOrbitWidgetState extends State<AnimatedOrbitWidget>
                                 style: AppTextStyles.headingSmallStyle(
                                  context).copyWith(
                                   fontWeight: FontWeight.bold,
+                                    fontSize:widget.isHazardous? 17.sp:18.sp
                                 ),
                               ),
                               SizedBox(height: 4.h),
@@ -163,6 +164,7 @@ class _AnimatedOrbitWidgetState extends State<AnimatedOrbitWidget>
                                     ? 'This asteroid\'s orbit intersects Earth\'s orbit path and it is large enough to cause significant damage if impact occurs.'
                                     : 'This asteroid\'s orbit does not currently pose a threat to Earth.',
                                 style: AppTextStyles.descriptionSmallTextStyle(context).copyWith(color: AppColors.greyShimmerShade100),
+                                textAlign: TextAlign.justify,
                               ),
                             ],
                           ),

@@ -1,5 +1,5 @@
 import 'package:cosmospedia/src/core/app_themes/text_styles.dart';
-import 'package:cosmospedia/src/data/model/asteroid_model/asteroid_feed_model.dart';
+import 'package:cosmospedia/src/data/model/asteroid_model/asteroid_common_models/asteroid_estimated_diameter_model.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

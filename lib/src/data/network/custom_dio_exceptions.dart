@@ -48,25 +48,34 @@ class CustomDioExceptions implements Exception {
   }
 
   String _handleStatusError(int? statusCode, dynamic error) {
+    // 1. Pehle ye check karo ki 'error' null toh nahi ya Map hai ya nahi
+    String? serverMessage;
+    if (error != null && error is Map) {
+      serverMessage = error["message"]?.toString() ?? error["error"]?.toString();
+    } else if (error != null && error is String) {
+      // Agar server ne direct string bhej di (jaise 503 error mein hua)
+      serverMessage = error;
+    }
+
     switch (statusCode) {
       case 400:         //Some APIs return:{ "message": "Invalid API key" }.If message exists → show it ,If not → show safe default
-        return error["message"] ?? 'Bad request';
+        return serverMessage ?? 'Bad request'; //error["message"] inplace of serverMessage
       case 401:
-        return error["message"] ?? 'Unauthorized';
+        return serverMessage?? 'Unauthorized'; //error["message"]
       case 403:
-        return error["message"] ?? 'Forbidden';
+        return serverMessage ?? 'Forbidden'; //error["message"]
       case 404:
-        return error["message"] ?? 'Not Found';
+        return serverMessage ?? 'Not Found'; //error["message"]
       case 422:
-        return error["message"] ?? 'Can not proceed with the data provided.';
+        return serverMessage ?? 'Can not proceed with the data provided.'; //error["message"]
       case 406:
-        return error["message"] ?? 'Input Mismatched';
+        return serverMessage ?? 'Input Mismatched'; //error["message"]
       case 500:
-        return error["message"] ?? 'Internal server error';
+        return serverMessage ?? 'Internal server error'; //error["message"]
       case 502:
-        return error["message"] ?? 'Bad gateway';
+        return serverMessage ?? 'Bad gateway'; //error["message"]
       default:
-        return error["message"] ?? 'Oops something went wrong';
+        return serverMessage ?? 'Oops something went wrong'; //error["message"]
     }
   }
 

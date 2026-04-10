@@ -14,4 +14,9 @@ class SignInCubit extends Cubit<SignInState> {
    isPasswordVisible=!pwdVisible;
    emit(TogglePasswordState());
  }
+
+ // only for checking do not use this remove this func later
+ // void init(){ // yeh sign in button par call ho raha h
+ //   emit(SignInSuccessState());
+ // }
 }

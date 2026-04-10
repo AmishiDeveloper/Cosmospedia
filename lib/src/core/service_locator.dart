@@ -1,9 +1,14 @@
 import 'package:cosmospedia/src/data/network/data_source/nasa/apod_api_service/apod_api_service.dart';
 import 'package:cosmospedia/src/data/network/data_source/nasa/asteroid_api_service/asteroid_api_service.dart';
+import 'package:cosmospedia/src/data/network/data_source/nasa/cme_api_service/cme_api_service.dart';
+import 'package:cosmospedia/src/data/network/data_source/space_dev/space_news/launch_library_api_service/launch_library_api_service.dart';
+import 'package:cosmospedia/src/data/network/data_source/space_dev/space_news/space_flight_news_api_service/space_flight_news_api_service.dart';
 import 'package:cosmospedia/src/data/network/dio_client.dart';
 import 'package:cosmospedia/src/data/network/dio_factory.dart';
 import 'package:cosmospedia/src/data/repository/nasa_repo/apod_repository/apod_repository.dart';
 import 'package:cosmospedia/src/data/repository/nasa_repo/asteroid_repository/asteroid_repository.dart';
+import 'package:cosmospedia/src/data/repository/nasa_repo/cme_repository/cme_repository.dart';
+import 'package:cosmospedia/src/data/repository/space_dev_repo/space_news_repo/space_news_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 
@@ -65,39 +70,105 @@ class ServiceLocator {
       instanceName: 'nasaClient',
     );
 
-    /*SpaceFlight / TheSpaceDev API
-    Register a Dio instance specifically configured for spaceDev API
-    - Created using DioFactory.theSpaceDev()
-    - Stored with the name 'space'
-    - This Dio has space flight baseUrl
+    /*SpaceFlight API
+    Register a Dio instance specifically configured for spaceFlightNews API
+    - Created using DioFactory.theSpaceFlightNews()
+    - Stored with the name 'spaceFlight'
+    - This Dio has spaceFlightNews baseUrl
     - Same instance will be reused everywhere
     */
     getIt.registerSingleton<Dio>(
-      DioFactory.theSpaceDev(),
-      instanceName: 'space',
+      DioFactory.spaceFlightNewsApi(),
+      instanceName: 'spaceFlight',
     );
 
-    /* Register DioClient for spaceDev API
-     - getIt<Dio>(instanceName: 'space') fetches the space Dio instance that is just registered and stored in getIt
+    /* Register DioClient for spaceFlightNews API
+     - getIt<Dio>(instanceName: 'spaceFlight') fetches the space Dio instance that is just registered and stored in getIt
      - Passes it(space Dio instance) into DioClient that wraps Dio and adds interceptors, timeouts, etc.
-     - Stored with name 'spaceClient'
-     - Registers nasa DioClient (spaceClient) as singleton meaning “Create a DioClient instance using THAT SAME Dio instance, store this DioClient instance and reuse it everywhere”
+     - Stored with name 'spaceFlightClient'
+     - Registers nasa DioClient (spaceFlightClient) as singleton meaning “Create a DioClient instance using THAT SAME Dio instance, store this DioClient instance and reuse it everywhere”
        So dependency chain is:
-       space Dio  →  space DioClient(spaceClient)  →  API Service → Repository → Cubit
+       spaceFlightNews Dio  →  space DioClient(spaceFlightClient)  →  API Service → Repository → Cubit
     */
     getIt.registerSingleton<DioClient>(
-      DioClient(getIt<Dio>(instanceName: 'space')),
-      instanceName: 'spaceClient',
+      DioClient(getIt<Dio>(instanceName: 'spaceFlight')),
+      instanceName: 'spaceFlightClient',
+    );
+
+    /*SpaceLaunchLibrary2 API
+    Register a Dio instance specifically configured for launchLibrary2 API
+    - Created using DioFactory.launchLibrary()
+    - Stored with the name 'launchLibrary'
+    - This Dio has spaceLaunchLibraryBaseUrl baseUrl
+    - Same instance will be reused everywhere
+    */
+    getIt.registerSingleton<Dio>(
+      DioFactory.launchLibrary(),
+      instanceName: 'launchLibrary',
+    );
+
+    /* Register DioClient for launchLibrary2 API
+     - getIt<Dio>(instanceName: 'launchLibrary') fetches the launchLibrary Dio instance that is just registered and stored in getIt
+     - Passes it(launchLibrary Dio instance) into DioClient that wraps Dio and adds interceptors, timeouts, etc.
+     - Stored with name 'launchLibraryClient'
+     - Registers nasa DioClient (launchLibraryClient) as singleton meaning “Create a DioClient instance using THAT SAME Dio instance, store this DioClient instance and reuse it everywhere”
+       So dependency chain is:
+       launchLibrary Dio  →  space DioClient(launchLibraryClient)  →  API Service → Repository → Cubit
+    */
+    getIt.registerSingleton<DioClient>(
+      DioClient(getIt<Dio>(instanceName: 'launchLibrary')),
+      instanceName: 'launchLibraryClient',
     );
 
 
     ///Api Services
+
+    //apod
     getIt.registerSingleton(ApodApiService(getIt<DioClient>(instanceName: 'nasaClient')));
+
+    //asteroid
     getIt.registerSingleton(AsteroidApiService(getIt<DioClient>(instanceName: 'nasaClient')));
 
+    //cme
+    getIt.registerSingleton(CmeApiService(getIt<DioClient>(instanceName: 'nasaClient')));
+
+    //space flight
+    getIt.registerSingleton(SpaceFlightNewsApiService(getIt<DioClient>(instanceName: 'spaceFlightClient')));
+
+    //launch library
+    getIt.registerSingleton(LaunchLibraryApiService(getIt<DioClient>(instanceName: 'launchLibraryClient')));
+
+
     /// Repository
-    getIt.registerSingleton(ApodRepository(getIt<ApodApiService>()));
-    getIt.registerSingleton(AsteroidRepository(getIt<AsteroidApiService>()));
+
+    //apod
+    getIt.registerSingleton(
+        ApodRepository(
+          getIt<ApodApiService>(),
+        ),
+    );
+
+    //asteroid
+    getIt.registerSingleton(
+        AsteroidRepository(
+            getIt<AsteroidApiService>(),
+        ),
+    );
+
+    //cme
+    getIt.registerSingleton(
+      CmeRepository(
+        getIt<CmeApiService>(),
+      ),
+    );
+
+    //space news
+    getIt.registerSingleton(
+        SpaceNewsRepository(
+            getIt<SpaceFlightNewsApiService>(),
+            getIt<LaunchLibraryApiService>(),
+        ),
+    );
 
     ///Cubits
 

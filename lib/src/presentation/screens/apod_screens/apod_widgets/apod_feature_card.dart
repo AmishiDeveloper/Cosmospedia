@@ -69,7 +69,7 @@ class ApodFeatureCard extends StatelessWidget {
 
             Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(vertical: 5.h),
+              padding: EdgeInsets.symmetric(vertical: 5.h,horizontal: 6.w),
               decoration: BoxDecoration(
                 color: AppColors.greyShimmerShade300,//surfaceLight,//cardDark,
                 borderRadius: BorderRadius.only(

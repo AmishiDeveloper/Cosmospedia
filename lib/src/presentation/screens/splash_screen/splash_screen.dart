@@ -1,7 +1,10 @@
+import 'package:cosmospedia/src/core/app_themes/app_colors.dart';
 import 'package:cosmospedia/src/core/routes/app_route.dart';
 import 'package:cosmospedia/src/logic/cubits/auth/sign_in_cubit/sign_in_cubit.dart';
+import 'package:cosmospedia/src/logic/cubits/bottom_nav_bar/navigation_bar_cubit.dart';
 import 'package:cosmospedia/src/logic/cubits/splash_cubit/splash_cubit.dart';
 import 'package:cosmospedia/src/presentation/screens/auth/sign_in_screen/sign_in_screen.dart';
+import 'package:cosmospedia/src/presentation/screens/bottom_nav_bar_screen/navigation_bar_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -24,7 +27,7 @@ logged in?" or "Is this their first time opening the app?"
     super.initState();
     Future.delayed(
       const Duration(milliseconds: 2000),
-      () => context.read()<SplashCubit>().initApp(),
+      () => context.read<SplashCubit>().initApp(),
     );
   }
 
@@ -39,9 +42,11 @@ logged in?" or "Is this their first time opening the app?"
         2. if state is SplashBottomNavBarState: Takes you straight to the Home screen
         (if you are already logged in).
         */
+
         listener: (context, state) {
           switch (state) {
-            case SplashLoginState:
+          //Agar state (object/instance) iss class ka instance hai, toh ye case chalao
+            case SplashLoginState(): // instance . now matching instance with instance
               Navigator.pushAndRemoveUntil(
                 context,
                 AppRoute.slide(
@@ -53,13 +58,19 @@ logged in?" or "Is this their first time opening the app?"
                 (Route<dynamic> route) => false,
               );
               break;
-            // case SplashBottomNavBarState:
-            //   Navigator.pushAndRemoveUntil(
-            //     context,
-            //     AppRoute.slide(const HomeScreen()),
-            //     (Route<dynamic> route) => false,
-            //   );
-            //   break;
+
+            case SplashBottomNavBarState():
+              Navigator.pushAndRemoveUntil(
+                context,
+                AppRoute.slide(
+                  BlocProvider(
+                     create: (context) => NavigationBarCubit(),
+                     child: const NavigationBarScreen(),
+                  ),
+                ),
+                (Route<dynamic> route) => false,
+              );
+              break;
 
             default:
               return;
@@ -73,10 +84,10 @@ logged in?" or "Is this their first time opening the app?"
               begin: AlignmentGeometry.topCenter,
               end: AlignmentGeometry.bottomCenter,
               colors: [
-                const Color(0xFF050A30),
-                const Color(0xFF0F1B5F),
-                const Color(0xFF0F1B5F),
-                const Color(0xFF050A30),
+                AppColors.splashRoyalBlueBackground,
+                AppColors.splashBlueBackground,
+                AppColors.splashBlueBackground,
+                AppColors.splashRoyalBlueBackground,
               ],
               stops: const [0.0, 0.3, 0.7, 1.0],
             ),

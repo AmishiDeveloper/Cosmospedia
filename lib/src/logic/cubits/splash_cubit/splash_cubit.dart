@@ -19,8 +19,10 @@ class SplashCubit extends Cubit<SplashState> {
     // 1. Check if a user is already signed in via Firebase
     final user = FirebaseAuth.instance.currentUser;
     // 2. Decide which screen to go to
+
+    //bas abhi ke liye kar rahe h jisse chal jaye saari screens baad m saare comments hata dena
     if(user !=null){
-      // Session exists!
+      //Session exists!
       emit(SplashBottomNavBarState());
     }
     else{

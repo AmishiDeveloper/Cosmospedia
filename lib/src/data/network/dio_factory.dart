@@ -18,12 +18,23 @@ class DioFactory {
   }
 
   /*Creates a new Dio instance
-  Configured only for SpaceFlight / SpaceDev API
+  Configured only for SpaceFlight API
   Returns it*/
-  static Dio theSpaceDev() {
+  static Dio spaceFlightNewsApi() {
     return Dio(
       BaseOptions(
-        baseUrl: Endpoints.spaceFlightBaseUrl,
+        baseUrl: Endpoints.spaceFlightNewsBaseUrl,
+      ),
+    );
+  }
+
+  /*Creates a new Dio instance
+  Configured only for launchLibrary2  API
+  Returns it*/
+  static Dio launchLibrary() {
+    return Dio(
+      BaseOptions(
+        baseUrl: Endpoints.spaceLaunchLibraryBaseUrl,
       ),
     );
   }

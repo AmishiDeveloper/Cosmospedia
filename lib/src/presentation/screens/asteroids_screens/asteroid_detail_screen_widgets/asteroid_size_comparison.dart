@@ -37,27 +37,27 @@ class AsteroidSizeComparison extends StatelessWidget {
       {
         'name': 'Football Field',
         'size': footballField,
-        'color': AppColors.infoDark,
+        'color': AppColors.info,//infoDark,
         'icon': Icons.sports_football,
       },
       {
         'name': 'Eiffel Tower',
         'size': eiffelTower,
-        'color': AppColors.success,//
+        'color': AppColors.textPurple,//.success,
         // AppColors.primaryDark,
         'icon': Icons.location_city,
       },
       {
         'name': 'Empire State',
         'size': empireState,
-        'color': //AppColors.orangeShade800,
-        Colors.cyan,
+        'color': AppColors.success,//orangeShade800,
+        //Colors.cyan,
         'icon': Icons.apartment,
       },
       {
         'name': 'Burj Khalifa',
         'size': burjKhalifa,
-        'color': AppColors.orangeShade800,//textDeepPurple, //Colors.indigo,
+        'color': AppColors.orange,//orangeShade800,//textDeepPurple, //Colors.indigo,
         'icon': Icons.business,
       },
     ];
@@ -275,13 +275,13 @@ class AsteroidSizeComparison extends StatelessWidget {
             child: ListView(
               scrollDirection: Axis.horizontal,
               children: [
-                _buildLegendRow(context,AppColors.infoDark,'FootBall Field'),
+                _buildLegendRow(context,AppColors.info,'FootBall Field'),
                 SizedBox(width: 20.w),
-                _buildLegendRow(context,AppColors.success,'Eiffel Tower'),
+                _buildLegendRow(context,AppColors.textPurple,'Eiffel Tower'),
                 SizedBox(width: 20.w),
-                _buildLegendRow(context,Colors.cyan,'Empire State'),
+                _buildLegendRow(context,AppColors.success,'Empire State'),
                 SizedBox(width: 20.w),
-                _buildLegendRow(context,AppColors.orangeShade800,'Burj Khalifa'),
+                _buildLegendRow(context,AppColors.orange,'Burj Khalifa'),
                 SizedBox(width: 20.w),
               ],
             ),

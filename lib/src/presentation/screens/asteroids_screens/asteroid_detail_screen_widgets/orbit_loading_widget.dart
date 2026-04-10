@@ -14,7 +14,7 @@ Widget orbitLoadingWidget() {
     ),
     child: Container(
       padding: EdgeInsets.symmetric(vertical: 20.h,horizontal: 20.w),
-      height: 465.h,
+      height: 500.h,
       decoration: BoxDecoration(
         color: AppColors.greyShimmerShade600,
         borderRadius:BorderRadius.circular(15.r),
@@ -24,7 +24,15 @@ Widget orbitLoadingWidget() {
         crossAxisAlignment: CrossAxisAlignment.start,
         // Isse alignment sahi rahegi
         children: [
-          Bone.text(words: 3),
+          
+          // header
+          Row(
+            children: [
+              Bone.circle(size: 40.w),
+              SizedBox(width: 20.w,),
+              Bone.text(words: 3),
+            ],
+          ),
 
           SizedBox(height: 10.h),
 
@@ -32,19 +40,20 @@ Widget orbitLoadingWidget() {
 
           SizedBox(height: 20.h),
 
+          // orbit
           Container(
-            height: 200.h,
+            height: 230.h,
             width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.h),
             decoration: BoxDecoration(
-              color: AppColors.greyShimmerShade400,
+              color: AppColors.greyShimmerShade700.withOpacity(0.5),
               shape: BoxShape.circle
               //borderRadius: BorderRadius.all(Radius.circular(15.r)),
             ),
-            child: Bone.circle(size: 200.h,),
+            child: Bone.circle(),
           ),
 
-          SizedBox(height: 30.h),
+          SizedBox(height: 10.h),
 
           Container(
             height: 55.h,
@@ -59,7 +68,7 @@ Widget orbitLoadingWidget() {
 
                 Bone.square(size: 13.h,),
                 SizedBox(width: 10.w),
-                Bone.text(words: 1,),
+                Bone.text(words: 2,),
 
                 SizedBox(width: 20.w,),
 

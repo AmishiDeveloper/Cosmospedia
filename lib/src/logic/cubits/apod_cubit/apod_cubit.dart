@@ -73,7 +73,20 @@ class ApodCubit extends Cubit<ApodState> {
               String yesterday = DateFormat('dd-MM-yyyy').format(DateTime.now().subtract(const Duration(days: 1)));
               getInitialData(yesterdayDate: yesterday);
             } else {
-              emit(ApodErrorState(errorMessage: error.message));
+              // AGAR AAJ KA DATA NAHI HAI, aur yesterdayDate mein ab kl ki date aa rahi h TAB BHI SUCCESS EMIT KARO!
+              // Taaki Carousel toh dikhe, bas niche list khali rahe ya error msg dikhaye.
+              _emitSuccess(
+                ApodSuccessState(
+                  apodCarouselImageList: carouselList, // <--- Carousel data bhej diya
+                  apodImageList: [], // Khali list bhejo taaki crash na ho
+                  startDate: currentUIFormat,
+                  endDate: currentUIFormat,
+                  //errorMessage: error.message, // State mein ek extra String field rakho error ke liye
+                ),
+              );
+              //old logic
+              // - ek baar check kar lena apod data aa jane par phir se. hataya isliye kyunki jaise hi aaj ki date ka apod nahi h toh yesterday ki date select karo toh jaise hi yesteday ki date select hui toh phele yesterday date null thi ab nahi h toh else case pe aake errorstate emit kar fdega jisse puri ui hi gayab ho jayegi. aur hum yesterday ki date milne ke baad bhi yesterday ki apod nahi dikha rahe h kyunki apod ka mtlb h aaj ki photo isiliye vhn bas ek msg dikha diya ki no images found for this range. aur rahi baat error widget ki toh voh puri screen pe aata h lekin hume carousel toh dekhna h na usmein toh koi aisa nahi h ki date wise img aa rahi ho isliye error state ki jgh success state emit ki h.
+              //emit(ApodErrorState(errorMessage: error.message));
             }
           },
           (todayList) {

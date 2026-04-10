@@ -4,7 +4,9 @@ import 'package:cosmospedia/src/core/const/regular_expressions/regex.dart';
 import 'package:cosmospedia/src/core/routes/app_route.dart';
 import 'package:cosmospedia/src/logic/cubits/auth/sign_in_cubit/sign_in_cubit.dart';
 import 'package:cosmospedia/src/logic/cubits/auth/sign_up_cubit/sign_up_cubit.dart';
+import 'package:cosmospedia/src/logic/cubits/bottom_nav_bar/navigation_bar_cubit.dart';
 import 'package:cosmospedia/src/presentation/screens/auth/sign_up_screen/sign_up_screen.dart';
+import 'package:cosmospedia/src/presentation/screens/bottom_nav_bar_screen/navigation_bar_screen.dart';
 import 'package:cosmospedia/src/presentation/widgets/custom_background_widget.dart';
 import 'package:cosmospedia/src/presentation/widgets/custom_elevated_button.dart';
 import 'package:cosmospedia/src/presentation/widgets/custom_snack_bar.dart';
@@ -102,10 +104,16 @@ class _SignInScreenState extends State<SignInScreen> {
               message: "Login Successful!",
               success: true, // Taki background green dikhe
             );
-            // Navigator.pushReplacement(
-            //   context,
-            //   AppRoute.slide(const HomeScreen()),
-            // );
+            Navigator.pushAndRemoveUntil(
+              context,
+              AppRoute.slide(
+                BlocProvider(
+                  create: (context) => NavigationBarCubit(),
+                  child: const NavigationBarScreen(),
+                ),
+              ),
+                  (Route<dynamic> route) => false,
+            );
           }
         },
         builder: (context, state) {
@@ -123,7 +131,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         Icon(
                           Icons.rocket_launch,
                           size: 70.h,
-                          color: Colors.white,
+                          color: AppColors.surfaceLight,
                         ),
 
                         SizedBox(height: 20.h),
@@ -178,8 +186,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               return 'Email is required';
                             }
                             if (!RegularExpressions.emailRegex.hasMatch(
-                              value,
-                            )) {
+                              value)) {
                               return 'Enter valid email Address';
                             }
                             return null;
@@ -233,8 +240,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               return 'Password is required';
                             }
                             if (!RegularExpressions.passwordRegex.hasMatch(
-                              value,
-                            )) {
+                              value)) {
                               return 'Enter valid password (8-15 characters).';
                             }
                             return null;
@@ -248,7 +254,9 @@ class _SignInScreenState extends State<SignInScreen> {
                           text: 'Sign in',
                           width: double.infinity,
                           onPressed: () {
-                            if (_formKey.currentState!.validate()) {}
+                            if (_formKey.currentState!.validate()) {
+                              //context.read<SignInCubit>().init();
+                            }
                           },
                         ),
 
