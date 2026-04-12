@@ -3,6 +3,8 @@ import 'package:cosmospedia/src/core/service_locator.dart';
 import 'package:cosmospedia/src/data/model/cme_models/cme_analysis_model/cme_analysis_model.dart';
 import 'package:cosmospedia/src/data/model/cme_models/cme_model/cme_model.dart';
 import 'package:cosmospedia/src/data/repository/nasa_repo/cme_repository/cme_repository.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 
 part 'cme_and_cme_analysis_state.dart';
@@ -46,12 +48,33 @@ class CmeAndCmeAnalysisCubit extends Cubit<CmeAndCmeAnalysisState> {
             if (cmeList.isEmpty && analysisList.isEmpty) {
               emit(CmeAndCmeAnalysisErrorState(errorMessage: "No data found for this range"));
             } else {
+              final typedCmeList = cmeList as List<CmeModel>;
+              // 🎯 Logic: Shock Arrival Time check karna
+              final totalCmes = typedCmeList.length;
+
+              final earthImpactCount = typedCmeList.where((cme) {
+                // 1. Check karo ki analyses list null ya empty toh nahi h
+                if (cme.cmeAnalyses == null || cme.cmeAnalyses!.isEmpty) return false;
+
+                // 2. cmeAnalyses list ke andar 'any' analysis check karo jisme enlilList ho
+                return cme.cmeAnalyses!.any((analysis) {
+                  return analysis.enlilList != null &&
+                      analysis.enlilList!.any((enlil) => enlil.estimatedShockArrivalTime != null);
+                });
+              }).length;
+
+              double probability = totalCmes > 0
+                  ? (earthImpactCount / totalCmes) * 100
+                  : 0.0;
+
               emit(CmeAndCmeAnalysisSuccessState(
                 cmeData: cmeList as List<CmeModel>,
                 cmeAnalysis: analysisList as List<CmeAnalysisModel>,
                 startDate: startDate,
                 endDate: endDate,
+                activeDate: DateFormat('yyyy-MM-dd').parse(endDate),
                 isUpdating: false,
+                impactProbability: probability,
               ));
             }
           },
@@ -66,6 +89,65 @@ class CmeAndCmeAnalysisCubit extends Cubit<CmeAndCmeAnalysisState> {
       final currentState = state as CmeAndCmeAnalysisSuccessState;
       emit(currentState.copyWith(cmeData: filteredCme));
     }
+  }
+
+  void toggleCmeExpansion(int index) {
+    if (state is CmeAndCmeAnalysisSuccessState) {
+      final currentState = state as CmeAndCmeAnalysisSuccessState;
+
+      if (currentState.cmeExpansionTileExpandedIndex == index) {
+        // Agar same index click hua toh band kar do (null set karo)
+        emit(currentState.copyWith(forceNull: true));
+      } else {
+        // Naya index kholo
+        emit(currentState.copyWith(cmeExpansionTileExpandedIndex: index));
+      }
+    }
+  }
+
+  Future<void> pickEndDate(BuildContext context) async {
+    final DateTime now = DateTime.now();
+
+    // Default initial date: Aaj ki date
+    DateTime initialCalendarDate = now;
+
+    // Agar user pehle hi koi date select kar chuka hai (Success state mein hai),
+    // toh wahi date calendar mein initial dikhao.
+    if (state is CmeAndCmeAnalysisSuccessState) {
+      initialCalendarDate = (state as CmeAndCmeAnalysisSuccessState).activeDate;
+    }
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialCalendarDate, // Ab ye dynamic hai
+      firstDate: DateTime(1995, 6, 16),
+      lastDate: now,
+    );
+
+    if (picked != null) {
+      updateDateRange(picked);
+    }
+  }
+
+  Future<void> updateDateRange(DateTime selectedDate) async {
+    // Check if we are in success state to show "Calculating..."
+    if (state is CmeAndCmeAnalysisSuccessState) {
+      final currentState = state as CmeAndCmeAnalysisSuccessState;
+
+      // API hit karne se pehle isUpdating ko true emit kar do
+      emit(currentState.copyWith(isUpdating: true));
+    }
+
+    // 1. End Date wahi hogi jo user ne select ki h
+    String end = DateFormat('yyyy-MM-dd').format(selectedDate);
+
+    // 2. Start Date usse 30 din pehle ki
+    String start = DateFormat('yyyy-MM-dd').format(
+        selectedDate.subtract(const Duration(days: 30))
+    );
+
+    // 3. API hit karo naye range ke saath
+    await fetchCmeAndAnalysisData(startDate: start, endDate: end);
   }
 
 

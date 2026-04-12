@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:cosmospedia/src/data/model/cme_models/cme_common_models/cme_catalog.dart';
+import 'package:cosmospedia/src/data/model/cme_models/cme_common_models/cme_common_model.dart';
 
 List<CmeAnalysisModel> cmeAnalysisModelFromJson(String str) => List<CmeAnalysisModel>.from(json.decode(str).map((x) => CmeAnalysisModel.fromJson(x)));
 
@@ -25,8 +25,8 @@ class CmeAnalysisModel {
   Catalog? catalog;
   FeatureCode? featureCode;
   String? dataLevel;
-  FeatureCode? measurementTechnique;
-  FeatureCode? imageType;
+  MeasurementTechnique? measurementTechnique;
+  ImageType? imageType;
   dynamic tilt;
   dynamic minorHalfWidth;
   dynamic speedMeasuredAtHeight;
@@ -74,8 +74,8 @@ class CmeAnalysisModel {
     Catalog? catalog,
     FeatureCode? featureCode,
     String? dataLevel,
-    FeatureCode? measurementTechnique,
-    FeatureCode? imageType,
+    MeasurementTechnique? measurementTechnique,
+    ImageType? imageType,
     dynamic tilt,
     dynamic minorHalfWidth,
     dynamic speedMeasuredAtHeight,
@@ -124,11 +124,19 @@ class CmeAnalysisModel {
     associatedCmEstartTime: json["associatedCMEstartTime"],
     note: json["note"],
     associatedCmeLink: json["associatedCMELink"],
-    catalog: catalogValues.map[json["catalog"]]!,
-    featureCode: featureCodeValues.map[json["featureCode"]]!,
+    catalog: (json["catalog"] != null && catalogValues.map.containsKey(json["catalog"]))
+        ? catalogValues.map[json["catalog"]]
+        : null,//catalogValues.map[json["catalog"]]!,
+    featureCode: (json["featureCode"] != null && featureCodeValues.map.containsKey(json["featureCode"]))
+        ? featureCodeValues.map[json["featureCode"]]
+        : null,//featureCodeValues.map[json["featureCode"]]!,
     dataLevel: json["dataLevel"],
-    measurementTechnique: featureCodeValues.map[json["measurementTechnique"]]!,
-    imageType: featureCodeValues.map[json["imageType"]]!,
+    measurementTechnique: (json["measurementTechnique"] != null && measurementTechniqueValues.map.containsKey(json["measurementTechnique"]))
+        ? measurementTechniqueValues.map[json["measurementTechnique"]]
+        : null,//featureCodeValues.map[json["measurementTechnique"]]!,
+    imageType: (json["imageType"] != null && imageTypeValues.map.containsKey(json["imageType"]))
+        ? imageTypeValues.map[json["imageType"]]
+        : null,//featureCodeValues.map[json["imageType"]]!,
     tilt: json["tilt"],
     minorHalfWidth: json["minorHalfWidth"],
     speedMeasuredAtHeight: json["speedMeasuredAtHeight"],
@@ -152,8 +160,8 @@ class CmeAnalysisModel {
     "catalog": catalogValues.reverse[catalog],
     "featureCode": featureCodeValues.reverse[featureCode],
     "dataLevel": dataLevel,
-    "measurementTechnique": featureCodeValues.reverse[measurementTechnique],
-    "imageType": featureCodeValues.reverse[imageType],
+    "measurementTechnique": measurementTechniqueValues.reverse[measurementTechnique],
+    "imageType": imageTypeValues.reverse[imageType],
     "tilt": tilt,
     "minorHalfWidth": minorHalfWidth,
     "speedMeasuredAtHeight": speedMeasuredAtHeight,
@@ -171,25 +179,25 @@ class CmeAnalysisModel {
 //   "M2M_CATALOG": Catalog.M2_M_CATALOG
 // });
 
-enum FeatureCode {
-  NULL
-}
+// enum FeatureCode {
+//   NULL
+// }
 
-final featureCodeValues = EnumValues({
-  "null": FeatureCode.NULL
-});
+// final featureCodeValues = EnumValues({
+//   "null": FeatureCode.NULL
+// });
 
-enum Type {
-  C,
-  S,
-  O
-}
+// enum Type {
+//   C,
+//   S,
+//   O
+// }
 
-final typeValues = EnumValues({
-  "C": Type.C,
-  "S": Type.S,
-  "O": Type.O
-});
+// final typeValues = EnumValues({
+//   "C": Type.C,
+//   "S": Type.S,
+//   "O": Type.O
+// });
 
 // class EnumValues<T> {
 //   Map<String, T> map;

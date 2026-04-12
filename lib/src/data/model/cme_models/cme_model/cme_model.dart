@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:cosmospedia/src/data/model/cme_models/cme_common_models/cme_catalog.dart';
+import 'package:cosmospedia/src/data/model/cme_models/cme_common_models/cme_common_model.dart';
 
 List<CmeModel> cmeModelFromJson(String str) => List<CmeModel>.from(json.decode(str).map((x) => CmeModel.fromJson(x)));
 
@@ -116,10 +116,10 @@ class CmeModel {
 class CmeAnalysis {
   bool? isMostAccurate;
   String? time215;
-  int? latitude;
-  int? longitude;
-  int? halfAngle;
-  int? speed;
+  double? latitude;
+  double? longitude;
+  double? halfAngle;
+  double? speed;
   Type? type;
   FeatureCode? featureCode;
   ImageType? imageType;
@@ -157,10 +157,10 @@ class CmeAnalysis {
   CmeAnalysis copyWith({
     bool? isMostAccurate,
     String? time215,
-    int? latitude,
-    int? longitude,
-    int? halfAngle,
-    int? speed,
+    double? latitude,
+    double? longitude,
+    double? halfAngle,
+    double? speed,
     Type? type,
     FeatureCode? featureCode,
     ImageType? imageType,
@@ -198,14 +198,22 @@ class CmeAnalysis {
   factory CmeAnalysis.fromJson(Map<String, dynamic> json) => CmeAnalysis(
     isMostAccurate: json["isMostAccurate"],
     time215: json["time21_5"],
-    latitude: json["latitude"],
-    longitude: json["longitude"],
-    halfAngle: json["halfAngle"],
-    speed: json["speed"],
-    type: typeValues.map[json["type"]]!,
-    featureCode: featureCodeValues.map[json["featureCode"]]!,
-    imageType: imageTypeValues.map[json["imageType"]]!,
-    measurementTechnique: measurementTechniqueValues.map[json["measurementTechnique"]]!,
+    latitude: (json["latitude"]as num?)?.toDouble(),
+    longitude:  (json["longitude"] as num?)?.toDouble(),
+    halfAngle: (json["halfAngle"]as num?)?.toDouble(),
+    speed: (json["speed"]as num?)?.toDouble(),
+    type: (json["type"] != null && typeValues.map.containsKey(json["type"]))
+        ? typeValues.map[json["type"]]
+        : null,//typeValues.map[json["type"]]!,
+    featureCode: (json["featureCode"] != null && featureCodeValues.map.containsKey(json["featureCode"]))
+        ? featureCodeValues.map[json["featureCode"]]
+        : null,//featureCodeValues.map[json["featureCode"]]!,
+    imageType:  (json["imageType"] != null && imageTypeValues.map.containsKey(json["imageType"]))
+        ? imageTypeValues.map[json["imageType"]]
+        : null,//imageTypeValues.map[json["imageType"]]!,
+    measurementTechnique: (json["measurementTechnique"] != null && measurementTechniqueValues.map.containsKey(json["measurementTechnique"]))
+        ? measurementTechniqueValues.map[json["measurementTechnique"]]
+        : null,//measurementTechniqueValues.map[json["measurementTechnique"]]!,
     note: json["note"],
     levelOfData: json["levelOfData"],
     tilt: json["tilt"],
@@ -368,7 +376,9 @@ class ImpactList {
   factory ImpactList.fromJson(Map<String, dynamic> json) => ImpactList(
     isGlancingBlow: json["isGlancingBlow"],
     isMinorImpact: json["isMinorImpact"],
-    location: locationValues.map[json["location"]]!,
+    location: (json["location"] != null && locationValues.map.containsKey(json["location"]))
+        ? locationValues.map[json["location"]]
+        : null,//locationValues.map[json["location"]]!,
     arrivalTime: json["arrivalTime"],
   );
 
@@ -408,45 +418,45 @@ final locationValues = EnumValues({
   "STEREO A": Location.STEREO_A
 });
 
-enum FeatureCode {
-  LE,
-  SH
-}
+// enum FeatureCode {
+//   LE,
+//   SH
+// }
 
-final featureCodeValues = EnumValues({
-  "LE": FeatureCode.LE,
-  "SH": FeatureCode.SH
-});
+// final featureCodeValues = EnumValues({
+//   "LE": FeatureCode.LE,
+//   "SH": FeatureCode.SH
+// });
 
-enum ImageType {
-  RUNNING_DIFFERENCE
-}
+// enum ImageType {
+//   RUNNING_DIFFERENCE
+// }
+//
+// final imageTypeValues = EnumValues({
+//   "running difference": ImageType.RUNNING_DIFFERENCE
+// });
 
-final imageTypeValues = EnumValues({
-  "running difference": ImageType.RUNNING_DIFFERENCE
-});
+// enum MeasurementTechnique {
+//   PLANE_OF_SKY,
+//   SWPC_CAT
+// }
 
-enum MeasurementTechnique {
-  PLANE_OF_SKY,
-  SWPC_CAT
-}
+// final measurementTechniqueValues = EnumValues({
+//   "Plane-of-sky": MeasurementTechnique.PLANE_OF_SKY,
+//   "SWPC_CAT": MeasurementTechnique.SWPC_CAT
+// });
 
-final measurementTechniqueValues = EnumValues({
-  "Plane-of-sky": MeasurementTechnique.PLANE_OF_SKY,
-  "SWPC_CAT": MeasurementTechnique.SWPC_CAT
-});
+// enum Type {
+//   C,
+//   O,
+//   S
+// }
 
-enum Type {
-  C,
-  O,
-  S
-}
-
-final typeValues = EnumValues({
-  "C": Type.C,
-  "O": Type.O,
-  "S": Type.S
-});
+// final typeValues = EnumValues({
+//   "C": Type.C,
+//   "O": Type.O,
+//   "S": Type.S
+// });
 
 class Instrument {
   DisplayName? displayName;
@@ -463,7 +473,9 @@ class Instrument {
       );
 
   factory Instrument.fromJson(Map<String, dynamic> json) => Instrument(
-    displayName: displayNameValues.map[json["displayName"]]!,
+    displayName: (json["displayName"] != null && displayNameValues.map.containsKey(json["displayName"]))
+        ? displayNameValues.map[json["displayName"]]
+        : null, //displayNameValues.map[json["displayName"]]!,
   );
 
   Map<String, dynamic> toJson() => {

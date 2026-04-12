@@ -14,33 +14,33 @@ class CmeAndCmeAnalysisScreen extends StatefulWidget {
   const CmeAndCmeAnalysisScreen({super.key});
 
   @override
-  State<CmeAndCmeAnalysisScreen> createState() => _CmeAndCmeAnalysisScreenState();
+  State<CmeAndCmeAnalysisScreen> createState() =>
+      _CmeAndCmeAnalysisScreenState();
 }
 
 class _CmeAndCmeAnalysisScreenState extends State<CmeAndCmeAnalysisScreen> {
-
   @override
   void initState() {
     super.initState();
     // API Hit on start
     String end = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    String start = DateFormat('yyyy-MM-dd').format(DateTime.now().subtract(const Duration(days: 30)));
+    String start = DateFormat(
+      'yyyy-MM-dd',
+    ).format(DateTime.now().subtract(const Duration(days: 30)));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (context.mounted) {
-        context.read<CmeAndCmeAnalysisCubit>().fetchCmeAndAnalysisData(
-          startDate: start,
-          endDate: end,
-        );
+        context.read<CmeAndCmeAnalysisCubit>().updateDateRange(DateTime.now());//fetchCmeAndAnalysisData(startDate: start,endDate: end);
       }
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    String end = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    String start = DateFormat('yyyy-MM-dd').format(DateTime.now().subtract(const Duration(days: 30)));
+    // String end = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    // String start = DateFormat(
+    //   'yyyy-MM-dd',
+    // ).format(DateTime.now().subtract(const Duration(days: 30)));
 
     return DefaultTabController(
       length: 2,
@@ -74,22 +74,98 @@ class _CmeAndCmeAnalysisScreenState extends State<CmeAndCmeAnalysisScreen> {
                           borderRadius: BorderRadius.circular(15.r),
                           border: Border.all(color: AppColors.textPrimaryDark),
                         ),
-                        child: Row(
-                          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(Icons.date_range, color: AppColors.surfaceLight),
-                            SizedBox(width: 10.w),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        child: BlocBuilder<CmeAndCmeAnalysisCubit, CmeAndCmeAnalysisState>(
+                          builder: (context, state) {
+                            bool isUpdating = false;
+                            String dateText = "Calculating...";
+
+                            if (state is CmeAndCmeAnalysisSuccessState) {
+                              isUpdating = state.isUpdating;
+                              // Agar update ho raha h toh "Calculating..." dikhao, warna dates
+                              dateText = isUpdating
+                                  ? "Calculating period..."
+                                  : "${formatForUI(state.startDate)} to ${formatForUI(state.endDate)}";
+                            } else if (state is CmeAndCmeAnalysisLoadingState) {
+                              dateText = "Fetching data...";
+                            }
+
+                            return Row(
                               children: [
-                                Text("Monitoring Period",
-                                    style: AppTextStyles.descriptionSmallTextStyle(context)),
-                                Text("${start} to ${end}",
-                                    style: AppTextStyles.subHeadingLargeStyle(context).copyWith(fontSize: 16.sp)),
+                                Icon(
+                                  Icons.date_range,
+                                  color: AppColors.surfaceLight,
+                                ),
+                                SizedBox(width: 10.w),
+                                // BlocBuilder<CmeAndCmeAnalysisCubit, CmeAndCmeAnalysisState>(
+                                //       builder: (context, state) {
+                                //         bool isUpdating = false;
+                                //         String dateText = "Calculating...";
+                                //
+                                //         if (state is CmeAndCmeAnalysisSuccessState) {
+                                //
+                                //             isUpdating = state.isUpdating;
+                                //             // Agar update ho raha h toh "Calculating..." dikhao, warna dates
+                                //             dateText = isUpdating
+                                //                 ? "Calculating period..."
+                                //                 : "${state.startDate} to ${state.endDate}";
+                                //           } else if (state is CmeAndCmeAnalysisLoadingState) {
+                                //             dateText = "Fetching data...";
+                                //           }
+                                //         return
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Monitoring Period (30 days)",
+                                      style:
+                                          AppTextStyles.descriptionSmallTextStyle(
+                                            context,
+                                          ),
+                                    ),
+                                    Text(
+                                      dateText,
+                                      //"$displayStart to $displayEnd",
+                                      style:
+                                          AppTextStyles.descriptionSmallTextStyle(
+                                            context,
+                                          ).copyWith(
+                                            fontSize: 13.sp,
+                                            color:
+                                                AppColors.greyShimmerShade300,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                                // },
+                                //),
+                                Spacer(),
+
+                                // --- Calendar Button ---
+                                Container(
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: AppColors.primaryDark,
+                                  ),
+                                  child: IconButton(
+                                    onPressed:
+                                        (state is CmeAndCmeAnalysisSuccessState &&
+                                            state.isUpdating)
+                                        ? null // Disable button while updating
+                                        : () {
+                                            context
+                                                .read<CmeAndCmeAnalysisCubit>()
+                                                .pickEndDate(context);
+                                          },
+                                    icon: Icon(
+                                      Icons.calendar_month_rounded,
+                                      size: 24.h,
+                                      color: AppColors.surfaceLight,
+                                    ),
+                                  ),
+                                ),
                               ],
-                            ),
-                          ],
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -104,21 +180,29 @@ class _CmeAndCmeAnalysisScreenState extends State<CmeAndCmeAnalysisScreen> {
                         child: Container(
                           decoration: BoxDecoration(
                             color: AppColors.greyShimmerShade600,
-                            borderRadius: BorderRadius.circular(18.r),
+                            borderRadius: BorderRadius.circular(16.r),
                           ),
                           child: TabBar(
                             indicatorSize: TabBarIndicatorSize.tab,
                             indicator: BoxDecoration(
                               borderRadius: BorderRadius.circular(18.r),
                               gradient: LinearGradient(
-                                colors: [AppColors.primaryDark, AppColors.textDeepPurple],
+                                colors: [
+                                  AppColors.primaryDark,
+                                  AppColors.textDeepPurple,
+                                ],
                               ),
-                              border: Border.all(color: AppColors.textPrimaryDark),
+                              border: Border.all(
+                                color: AppColors.textPrimaryDark,
+                              ),
                             ),
-                            labelStyle: AppTextStyles.subHeadingLargeStyle(context).copyWith(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            labelStyle:
+                                AppTextStyles.subHeadingLargeStyle(
+                                  context,
+                                ).copyWith(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
                             unselectedLabelColor: AppColors.greyShimmerShade50,
                             dividerColor: Colors.transparent,
                             tabs: const [
@@ -131,27 +215,37 @@ class _CmeAndCmeAnalysisScreenState extends State<CmeAndCmeAnalysisScreen> {
                     ),
                   ];
                 },
-                body: BlocBuilder<CmeAndCmeAnalysisCubit, CmeAndCmeAnalysisState>(
-                  builder: (context, state) {
-                    if (state is CmeAndCmeAnalysisLoadingState) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (state is CmeAndCmeAnalysisErrorState) {
-                      return Center(child: Text(state.errorMessage));
-                    } else if (state is CmeAndCmeAnalysisSuccessState) {
-                      return TabBarView(
-                        physics: const BouncingScrollPhysics(),
-                        children: [
-                          // Tab 1: Timeline View (Table/List)
-                          CmeScreen(cmeData: state.cmeData),
+                body:
+                    BlocBuilder<CmeAndCmeAnalysisCubit, CmeAndCmeAnalysisState>(
+                      builder: (context, state) {
+                        if (state is CmeAndCmeAnalysisLoadingState) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (state is CmeAndCmeAnalysisErrorState) {
+                          return Center(child: Text(state.errorMessage));
+                        } else if (state is CmeAndCmeAnalysisSuccessState) {
+                          return TabBarView(
+                            physics: const BouncingScrollPhysics(),
+                            children: [
+                              // Tab 1: Timeline View (Table/List)
+                              CmeScreen(
+                                cmeData: state.cmeData,
+                                expansionIndex:
+                                    state.cmeExpansionTileExpandedIndex ?? -1,
+                              ),
 
-                          // Tab 2: Graphs View (CmeAnalysis)
-                          CmeAnalysisScreen(analysisData: state.cmeAnalysis),
-                        ],
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
+                              // Tab 2: Graphs View (CmeAnalysis)
+                              CmeAnalysisScreen(
+                                analysisData: state.cmeAnalysis,
+                                impactProbability: state.impactProbability,
+                              ),
+                            ],
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
               ),
             ),
           ),
@@ -159,24 +253,41 @@ class _CmeAndCmeAnalysisScreenState extends State<CmeAndCmeAnalysisScreen> {
       ),
     );
   }
+
+  // dateText calculation ke andar
+  String formatForUI(String dateStr) {
+    try {
+      DateTime dt = DateFormat('yyyy-MM-dd').parse(dateStr);
+      return DateFormat('dd MMM, yyyy').format(dt);
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
 }
 
 // --- Delegate for Sticky Header (Aapki file se copy kiya hua) ---
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
   final double height;
+
   _SliverAppBarDelegate({required this.child, required this.height});
 
-  @override double get minExtent => height;
-  @override double get maxExtent => height;
+  @override
+  double get minExtent => height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return SizedBox.expand(child: child);
   }
 
-  @override bool shouldRebuild(_SliverAppBarDelegate oldDelegate) => false;
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) => false;
 }
-
-
-
