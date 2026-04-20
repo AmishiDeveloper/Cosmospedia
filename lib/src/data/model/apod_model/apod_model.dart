@@ -78,7 +78,7 @@ class ApodModel {
   // Translation: Ye line-by-line check karta hai: "Achha, NASA ke 'explanation' wale dabbe mein kya hai? Use uthake mere Dart wale explanation mein daal do."
   // Special Logic: DateTime.parse(json["date"]) NASA ki string date (2026-02-19) ko Dart ki asli DateTime mein badal raha hai.
   factory ApodModel.fromJson(Map<String, dynamic> json) => ApodModel(
-    date: json["date"] == null ? null : DateTime.parse(json["date"]),
+    date: json["date"] == null ? null : DateTime.tryParse(json["date"]),
     explanation: json["explanation"],
     hdurl: json["hdurl"],
     mediaType: json["media_type"],

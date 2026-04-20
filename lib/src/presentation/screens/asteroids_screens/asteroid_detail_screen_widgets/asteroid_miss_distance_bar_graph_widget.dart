@@ -24,9 +24,9 @@ class AsteroidMissDistanceBarGraphWidget extends StatelessWidget {
     else if (name == 'Miles')
       referenceMax = 93000000.0; //45000000.0
     else if (name == 'Lunar')
-      referenceMax = 400.0;//150.0
+      referenceMax = 400.0; //150.0
     else if (name == 'AU')
-      referenceMax = 1.0;//0.5
+      referenceMax = 1.0; //0.5
 
     return ((value / referenceMax) * 100).clamp(10.0, 100.0);
   }
@@ -97,23 +97,32 @@ class AsteroidMissDistanceBarGraphWidget extends StatelessWidget {
 
                   SizedBox(width: 8.w),
 
-                  Text(
-                    'Miss Distance Comparison',
-                    style: AppTextStyles.headingSmallStyle(
-                      context,
-                    ).copyWith(fontSize: 14.sp),
+                  Expanded(
+                    child: Text(
+                      'Miss Distance Comparison',
+                      style: AppTextStyles.headingSmallStyle(
+                        context,
+                      ).copyWith(fontSize: 17.sp),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
 
-                  const Spacer(),
+                  //SizedBox(width: 10.w),
 
                   // DROPDOWN
-                  _buildDropdown(context, selected),
+                  Flexible(
+                    flex: 1,
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: _buildDropdown(context, selected),
+                    ),
+                  ),
                 ],
               ),
 
               Divider(color: AppColors.greyShimmerShade100, height: 25.h),
 
-              SizedBox(height: 15.h),
+              SizedBox(height: 5.h),
 
               // BAR CHART (Option 3 Logic)
               SizedBox(height: 220.h, child: _buildBarChart(context, barItems)),
@@ -395,8 +404,10 @@ class AsteroidMissDistanceBarGraphWidget extends StatelessWidget {
             showingTooltipIndicators: [0],
             barRods: [
               BarChartRodData(
-                toY: getNormalizedY(item['val'], item['name']),//bar ki unchai
-                color: item['color'], //bar ka color (blue, purple, green, orange)
+                toY: getNormalizedY(item['val'], item['name']),
+                //bar ki unchai
+                color: item['color'],
+                //bar ka color (blue, purple, green, orange)
                 width: 40.w,
 
                 //background box
@@ -481,7 +492,9 @@ class AsteroidMissDistanceBarGraphWidget extends StatelessWidget {
 
           Text(
             'The graph uses an average Near-Earth limit as 100% scale for visual comparison:',
-            style: AppTextStyles.headingSmallStyle(context).copyWith(fontSize: 14.sp, color: AppColors.greyShimmerShade300),
+            style: AppTextStyles.headingSmallStyle(
+              context,
+            ).copyWith(fontSize: 14.sp, color: AppColors.greyShimmerShade300),
             softWrap: true,
           ),
 
@@ -489,7 +502,9 @@ class AsteroidMissDistanceBarGraphWidget extends StatelessWidget {
 
           Text(
             '•Kilometers: 150 Million km (1 AU)\n• Miles: 93 Million miles\n• Lunar Distance: 400 LD\n• Astronomical Units: 1.0 AU',
-            style: AppTextStyles.headingSmallStyle(context).copyWith(fontSize: 14.sp, color: AppColors.greyShimmerShade300),
+            style: AppTextStyles.headingSmallStyle(
+              context,
+            ).copyWith(fontSize: 14.sp, color: AppColors.greyShimmerShade300),
             softWrap: true,
           ),
 
@@ -497,10 +512,11 @@ class AsteroidMissDistanceBarGraphWidget extends StatelessWidget {
 
           Text(
             'Note: A full bar indicates the asteroid is at or beyond these deep-space benchmarks.',
-            style: AppTextStyles.headingSmallStyle(context).copyWith(fontSize: 14.sp, color: AppColors.greyShimmerShade300),
+            style: AppTextStyles.headingSmallStyle(
+              context,
+            ).copyWith(fontSize: 14.sp, color: AppColors.greyShimmerShade300),
             softWrap: true,
           ),
-
         ],
       ),
     );

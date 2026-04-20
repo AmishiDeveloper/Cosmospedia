@@ -28,6 +28,13 @@ class SpaceContentDetailScreen extends StatelessWidget {
             SliverAppBar(
               expandedHeight: 350.h,
               pinned: true,
+              leading: Padding(
+                padding: EdgeInsets.all(8.w),
+                child: IconButton(
+                  icon:  Icon(Icons.arrow_back_ios_rounded, color: AppColors.greyShimmerShade600),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
               backgroundColor: AppColors.primaryDark,
               flexibleSpace: FlexibleSpaceBar(
                 background: Hero(

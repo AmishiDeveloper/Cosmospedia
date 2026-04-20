@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1022329946865",
+    "project_id": "cosmospedia-astronomical-help",
+    "storage_bucket": "cosmospedia-astronomical-help.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1022329946865:android:426ad1b7f7e0ce8439df50",
+        "android_client_info": {
+          "package_name": "com.cosmospedia.app.cosmospedia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQDmABp9EUh6pVKXoEH2gKmi4GJ8KFCNQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

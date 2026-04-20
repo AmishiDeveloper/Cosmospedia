@@ -16,9 +16,9 @@ class RegularExpressions {
 
   ///username
   //validator to check username
-  static final RegExp usernameRegex = RegExp(r'^[a-zA-Z0-9]{6,20}$');
+  static final RegExp usernameRegex = RegExp(r'^[a-zA-Z0-9 ]{6,20}$');
   //input formatter to allow only aphanumeric char and not special chars
-  static final RegExp usernameInput = RegExp(r'[a-zA-Z0-9]');
+  static final RegExp usernameInput = RegExp(r'[a-zA-Z0-9 ]');
 
 
   //static final RegExp inputFormatterDateRegex = RegExp(r'[0-9]');

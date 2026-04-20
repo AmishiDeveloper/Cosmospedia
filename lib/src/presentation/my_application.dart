@@ -1,3 +1,4 @@
+import 'package:cosmospedia/main.dart';
 import 'package:cosmospedia/src/logic/cubits/bottom_nav_bar/navigation_bar_cubit.dart';
 import 'package:cosmospedia/src/logic/cubits/splash_cubit/splash_cubit.dart';
 import 'package:cosmospedia/src/presentation/screens/bottom_nav_bar_screen/navigation_bar_screen.dart';
@@ -28,20 +29,21 @@ class MyApplication extends StatelessWidget {
               ensureScreenSize: true,
               builder: (BuildContext context, Widget? child) {
                 return MaterialApp(
+                  navigatorKey: navigatorKey,
                   debugShowCheckedModeBanner: false,
                   themeMode: ThemeMode.system,
                   title: 'CosmosPedia',
                   home: SafeArea(
                     child: //SplashScreen(),
                     // actually but for now testing ke liye nav bar
-                    // BlocProvider(
-                    //   create:(context)=>SplashCubit(),
-                    //   child:SplashScreen(),
-                    // ),
                     BlocProvider(
-                      create:(context)=>NavigationBarCubit(),
-                      child:NavigationBarScreen(),
+                      create:(context)=>SplashCubit(),
+                      child:SplashScreen(),
                     ),
+                    // BlocProvider(
+                    //   create:(context)=>NavigationBarCubit(),
+                    //   child:NavigationBarScreen(),
+                    // ),
                   ),
                 );
               },

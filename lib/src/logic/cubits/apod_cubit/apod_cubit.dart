@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:cosmospedia/src/core/service_locator.dart';
 import 'package:cosmospedia/src/data/model/apod_model/apod_model.dart';
@@ -5,20 +6,17 @@ import 'package:cosmospedia/src/data/repository/nasa_repo/apod_repository/apod_r
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 part 'apod_state.dart';
 
 /*
 Cubit, jo ki "Remote Control" hai jo is Manager ko command deta hai.
 Cubit ka kaam hai State Management.
-
 Cubit woh Remote Control hai jo user ke kehne par sabko order deta hai aur screen par dikhne wali cheezon ko badalta hai.
-
 State matlab: Screen abhi kaisi dikh rahi hai? (Kya loading chal rahi hai? Kya data aa gaya? Ya koi error aa gaya?)
-
 Cubit decide karta hai ki kab loader dikhana hai aur kab NASA ka photo.
-
 Cubit jo repo data bhejta hai either ke form mein yani agr left h either ke paas toh error agr right h toh success toh usko user ko ui pe kaise dikhana h yeh kaam h cubit ka
-
 Cubit Repository se data leta hai aur decide karta hai ki UI screen par abhi kya dikhega (Loading, Error, ya Success).
 */
 
@@ -29,82 +27,341 @@ class ApodCubit extends Cubit<ApodState> {
     getInitialData(); //Cubit bante hi humne NASA se data mangwana shuru kar diya.
   }
 
-  final _repo = getIt<ApodRepository>(); // cubit calls the repo so that whenever data is required it can be used to get it
+  // cubit calls the repo so that whenever data is required it can be used to get it
+  final _repo = getIt<ApodRepository>();
   bool isInitialFetch = true;
+  static const String _storageKey = 'cached_apod_data';
+
   // Yeh variable pichli success state ko sambhal kar rakhega
   ApodSuccessState? lastSuccessState;
-  String? limitStartDate; // jisse agr date range badi ho toh data end date se start date tak hi apod img dikhaye usse zyada nahi toh start date store karne ke liye.
 
-  // 1. Carousel ke liye (Screen load hote hi call karein)
+  // jisse agr date range badi ho toh data end date se start date tak hi apod img dikhaye usse zyada nahi toh start date store karne ke liye.
+  String? limitStartDate;
+
+  int retryCount = 0;
+
+  //getInitialData() without cache
+  // Future<void> getInitialData({String? yesterdayDate}) async {
+  //   isInitialFetch = retryCount == 0; //true;
+  //   if (isInitialFetch) emit(ApodLoadingState());
+  //
+  //   //emit(ApodLoadingState());
+  //
+  //   // 1. Date preparation (UI format: dd-MM-yyyy)
+  //   String currentUIFormat =
+  //       yesterdayDate ?? DateFormat('dd-MM-yyyy').format(DateTime.now());
+  //
+  //   // 2. API format (yyyy-MM-dd)
+  //   DateTime parsedDate = DateFormat('dd-MM-yyyy').parse(currentUIFormat);
+  //   String currentAPIFormat = DateFormat('yyyy-MM-dd').format(parsedDate);
+  //
+  //   // Parallel API calls
+  //   final carouselResponse = await _repo.fetchApodList(count: 5);
+  //   final todayApodResponse = await _repo.fetchApodList(
+  //     startDate: currentAPIFormat,
+  //     endDate: currentAPIFormat,
+  //   );
+  //
+  //   // STEP 1: Carousel handle karo
+  //   List<ApodModel> carouselList = [];
+  //   carouselResponse.fold(
+  //     (error) => debugPrint("Carousel API Failed: ${error.message}"),
+  //     (list) => carouselList = list,
+  //   );
+  //
+  //   // STEP 2: Today's APOD handle karo
+  //   todayApodResponse.fold(
+  //     (error) async {
+  //       //  AUTO RETRY LOGIC: Agar 503 (NASA Down) ya Timeout hai aur humne abhi tak retry nahi kiya
+  //       if ((error.message.contains("503") ||
+  //               error.message.contains("timeout")) &&
+  //           retryCount < 1) {
+  //         retryCount++;
+  //         debugPrint("NASA Timeout! Retrying in 2 seconds...");
+  //
+  //         await Future.delayed(const Duration(seconds: 2)); // 2 second ruko
+  //         return getInitialData(
+  //           yesterdayDate: yesterdayDate,
+  //         ); // Dubara call karo
+  //       }
+  //
+  //       //  Fallback: Agar aaj ka data NASA ne nahi dala (400), toh kal ka mangwao
+  //       if ((error.message.contains("400") ||
+  //               error.message.contains("Date must be between")) &&
+  //           yesterdayDate == null) {
+  //         retryCount = 0; // Reset for future calls
+  //
+  //         String yesterday = DateFormat(
+  //           'dd-MM-yyyy',
+  //         ).format(DateTime.now().subtract(const Duration(days: 1)));
+  //         getInitialData(yesterdayDate: yesterday);
+  //       } else {
+  //         retryCount = 0; // Reset for future calls
+  //
+  //         _emitSuccess(
+  //           ApodSuccessState(
+  //             apodCarouselImageList: carouselList,
+  //             apodImageList: [],
+  //             startDate: currentUIFormat,
+  //             endDate: currentUIFormat,
+  //           ),
+  //         );
+  //       }
+  //     },
+  //     (todayList) {
+  //       retryCount = 0; // Success hote hi retry counter reset kar do
+  //
+  //       //  FIX: Agar list KHALI hai, tabhi yesterday par jao
+  //       if (todayList.isEmpty && yesterdayDate == null) {
+  //         String yesterday = DateFormat(
+  //           'dd-MM-yyyy',
+  //         ).format(DateTime.now().subtract(const Duration(days: 1)));
+  //         getInitialData(yesterdayDate: yesterday);
+  //       } else {
+  //         // SUCCESS: Data mil gaya, ab use UI ko de do!
+  //         _emitSuccess(
+  //           ApodSuccessState(
+  //             apodCarouselImageList: carouselList,
+  //             apodImageList: todayList,
+  //             startDate: currentUIFormat,
+  //             endDate: currentUIFormat,
+  //             message: (yesterdayDate != null)
+  //                 ? "Today's APOD is not available. Showing latest data."
+  //                 : null,
+  //           ),
+  //         );
+  //       }
+  //     },
+  //   );
+  // }
+
+  // getInitialData with cache
+  // Future<void> getInitialData({String? yesterdayDate}) async {
+  //   isInitialFetch = retryCount == 0;
+  //   if (isInitialFetch) emit(ApodLoadingState());
+  //
+  //   // Dates prepare karo
+  //   String currentUIFormat =
+  //       yesterdayDate ?? DateFormat('dd-MM-yyyy').format(DateTime.now());
+  //   DateTime parsedDate = DateFormat('dd-MM-yyyy').parse(currentUIFormat);
+  //   String currentAPIFormat = DateFormat('yyyy-MM-dd').format(parsedDate);
+  //
+  //   //  Pehle hi cache load karlo background mein safety ke liye
+  //   final cachedState = await _loadFromLocal();
+  //
+  //   // Parallel API calls
+  //   final carouselResponse = await _repo.fetchApodList(count: 5);
+  //   final todayApodResponse = await _repo.fetchApodList(
+  //     startDate: currentAPIFormat,
+  //     endDate: currentAPIFormat,
+  //   );
+  //
+  //   // --- Carousel Handle Karo ---
+  //   List<ApodModel> carouselList = [];
+  //   carouselResponse.fold((error) {
+  //     debugPrint("Carousel API Failed: ${error.message}");
+  //
+  //     if (cachedState != null && cachedState.apodCarouselImageList.isNotEmpty) {
+  //       carouselList = cachedState.apodCarouselImageList;
+  //     } else {
+  //       // 2. Agar cache bhi nahi hai (Fresh install), toh carouselList khali rahegi
+  //       // Iska matlab UI mein 'apodCarouselImageList.isEmpty' check lagana padega
+  //       // taaki wahan 'Retry' button ya error icon dikhe, poori screen na udde.
+  //       carouselList = [];
+  //     }
+  //   }, (list) => carouselList = list);
+  //
+  //   // --- Today's Data Handle Karo ---
+  //   await todayApodResponse.fold(
+  //         (error) async {
+  //       // 1. Network/Server Issue check
+  //       if (error.message.contains("socket") ||
+  //           error.message.contains("timeout") ||
+  //           error.message.contains("503") ||
+  //           error.message.contains("Host lookup")) {
+  //
+  //         if (cachedState != null) {
+  //           String displayMsg = error.message.contains("503")
+  //               ? "NASA Server is busy. Showing cached data."
+  //               : "Connection unstable. Showing cached data.";
+  //
+  //           _emitSuccess(
+  //             cachedState.copyWith(message: displayMsg, isUpdating: false),
+  //           );
+  //           return; // ✅ Yahin se exit! Niche ka koi emit nahi chalega.
+  //         }
+  //       }
+  //
+  //       // 2. Auto Retry Logic (Sirf tab jab cache na ho)
+  //       if ((error.message.contains("503") || error.message.contains("timeout")) && retryCount < 1) {
+  //         retryCount++;
+  //         await Future.delayed(const Duration(seconds: 2));
+  //         return getInitialData(yesterdayDate: yesterdayDate);
+  //       }
+  //
+  //       // 3. Agar yahan tak pahunche, matlab na cache hai na retry bacha hai
+  //       emit(ApodErrorState(errorMessage: error.message)); // 🎯 Ab ye sahi jagah hai
+  //
+  //       // 4. Fallback Logic
+  //       if ((error.message.contains("400") || error.message.contains("Date must be between")) && yesterdayDate == null) {
+  //         String yesterday = DateFormat('dd-MM-yyyy').format(DateTime.now().subtract(const Duration(days: 1)));
+  //         getInitialData(yesterdayDate: yesterday);
+  //       } else {
+  //         retryCount = 0;
+  //         _emitSuccess(
+  //           ApodSuccessState(
+  //             apodCarouselImageList: carouselList,
+  //             apodImageList: [],
+  //             startDate: currentUIFormat,
+  //             endDate: currentUIFormat,
+  //           ),
+  //         );
+  //       }
+  //     },
+  //     (todayList) {
+  //       retryCount = 0;
+  //       isInitialFetch = false; //Success hote hi initial fetch khatam!
+  //       //ADD THIS: Agar NASA ne success bheja par list khali hai, toh Kal ka data try karo
+  //       if (todayList.isEmpty && yesterdayDate == null) {
+  //         debugPrint("NASA returned empty list. Checking yesterday's APOD...");
+  //
+  //         String yesterday = DateFormat(
+  //           'dd-MM-yyyy',
+  //         ).format(DateTime.now().subtract(const Duration(days: 1)));
+  //
+  //         // Dubara call karo yesterday ki date ke saath
+  //         return getInitialData(yesterdayDate: yesterday);
+  //       }
+  //
+  //       // Agar list khali nahi hai, ya hum pehle hi yesterday ka data mangwa chuke hain
+  //       _emitSuccess(
+  //         ApodSuccessState(
+  //           apodCarouselImageList: carouselList,
+  //           apodImageList: todayList,
+  //           startDate: currentUIFormat,
+  //           endDate: currentUIFormat,
+  //           message: (yesterdayDate != null)
+  //               ? "Today's APOD not available. Showing latest."
+  //               : null,
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
+
+
+  // getInitialData with cache but updated code to solve infinite snackbars problem
+  // getInitialData function ko isse replace karein
   Future<void> getInitialData({String? yesterdayDate}) async {
-    isInitialFetch = true;
+    isInitialFetch = retryCount == 0;
+    if (isInitialFetch) emit(ApodLoadingState());
 
-    //getting data for the first time
-    emit(ApodLoadingState()); // while data is being fetched from the api the shimmer is seen
-
-    // Dono API calls parallel mein fetch karein (Better Performance)
-    // Agar yesterdayDate pass ki gayi hai (fallback ke liye), toh use lo, warna DateTime.now()
     String currentUIFormat = yesterdayDate ?? DateFormat('dd-MM-yyyy').format(DateTime.now());
+    DateTime parsedDate = DateFormat('dd-MM-yyyy').parse(currentUIFormat);
+    String currentAPIFormat = DateFormat('yyyy-MM-dd').format(parsedDate);
 
-    // API ke liye yyyy-MM-dd format
-    String currentAPIFormat = DateFormat('yyyy-MM-dd').format(DateFormat('dd-MM-yyyy').parse(currentUIFormat));
+    final cachedState = await _loadFromLocal();
 
-    final carouselResponse = await _repo.fetchApodList(count: 5); // api to show imgs in carousel
+    final carouselResponse = await _repo.fetchApodList(count: 5);
     final todayApodResponse = await _repo.fetchApodList(
       startDate: currentAPIFormat,
-      endDate: currentAPIFormat); // todays apod to show in feature card
+      endDate: currentAPIFormat,
+    );
 
-    // Dono results ko check karke ek hi baar Success emit karein
-    /*Repository Either (Left/Right) bhejti thi? fold ka kaam hai use kholna.
+    List<ApodModel> carouselList = [];
+    carouselResponse.fold((error) {
+      if (cachedState != null) carouselList = cachedState.apodCarouselImageList;
+    }, (list) => carouselList = list);
 
-    Left (Error): Agar error aaya, toh UI ko ApodErrorState bhej do.
+    await todayApodResponse.fold(
+          (error) async {
+        // 🎯 FIX 1: Sirf tabhi "Unstable" bolo jab sach mein Socket/Timeout ho
+        bool isNetworkError = error.message.toLowerCase().contains("socket") ||
+            error.message.toLowerCase().contains("host lookup") ||
+            error.message.toLowerCase().contains("timeout");
 
-    Right (Success): Agar data mil gaya, toh ApodSuccessState bhej do jisme
-    saari images aur dates pack hongi.*/
+        bool isServerError = error.code == 503 || error.message.contains("503");
 
-    carouselResponse.fold(
-      (error) => emit(ApodErrorState(errorMessage: error.message)),
-      (carouselList) {
-        todayApodResponse.fold(
-          (error) {
-            //emit(ApodErrorState(errorMessage: error.message));
-            // Sirf ek baar fallback karein (infinite loop se bachne ke liye)
-            if (error.code == 400 && yesterdayDate==null) {
-              String yesterday = DateFormat('dd-MM-yyyy').format(DateTime.now().subtract(const Duration(days: 1)));
-              getInitialData(yesterdayDate: yesterday);
-            } else {
-              // AGAR AAJ KA DATA NAHI HAI, aur yesterdayDate mein ab kl ki date aa rahi h TAB BHI SUCCESS EMIT KARO!
-              // Taaki Carousel toh dikhe, bas niche list khali rahe ya error msg dikhaye.
-              _emitSuccess(
-                ApodSuccessState(
-                  apodCarouselImageList: carouselList, // <--- Carousel data bhej diya
-                  apodImageList: [], // Khali list bhejo taaki crash na ho
-                  startDate: currentUIFormat,
-                  endDate: currentUIFormat,
-                  //errorMessage: error.message, // State mein ek extra String field rakho error ke liye
-                ),
-              );
-              //old logic
-              // - ek baar check kar lena apod data aa jane par phir se. hataya isliye kyunki jaise hi aaj ki date ka apod nahi h toh yesterday ki date select karo toh jaise hi yesteday ki date select hui toh phele yesterday date null thi ab nahi h toh else case pe aake errorstate emit kar fdega jisse puri ui hi gayab ho jayegi. aur hum yesterday ki date milne ke baad bhi yesterday ki apod nahi dikha rahe h kyunki apod ka mtlb h aaj ki photo isiliye vhn bas ek msg dikha diya ki no images found for this range. aur rahi baat error widget ki toh voh puri screen pe aata h lekin hume carousel toh dekhna h na usmein toh koi aisa nahi h ki date wise img aa rahi ho isliye error state ki jgh success state emit ki h.
-              //emit(ApodErrorState(errorMessage: error.message));
-            }
-          },
+        if ((isNetworkError || isServerError) && cachedState != null) {
+          String displayMsg = isServerError
+              ? "NASA Server is busy. Showing last saved data."
+              : "Connection unstable. Showing last saved data.";
+
+          // Success emit karke yahin se RETURN ho jao, niche mat jaao
+          _emitSuccess(cachedState.copyWith(message: displayMsg, isUpdating: false));
+          return;
+        }
+
+        // 🎯 FIX 2: Retry sirf tab jab na cache ho na fallback
+        if ((isServerError || error.message.contains("timeout")) && retryCount < 1) {
+          retryCount++;
+          await Future.delayed(const Duration(seconds: 2));
+          return getInitialData(yesterdayDate: yesterdayDate);
+        }
+
+        // Final Error tabhi jab sab fail ho jaye
+        emit(ApodErrorState(errorMessage: error.message));
+
+        if (error.code == 400 && yesterdayDate == null) {
+          String yesterday = DateFormat('dd-MM-yyyy').format(DateTime.now().subtract(const Duration(days: 1)));
+          getInitialData(yesterdayDate: yesterday);
+        }
+      },
           (todayList) {
-            _emitSuccess(
-              ApodSuccessState(
-                apodCarouselImageList: carouselList,
-                apodImageList: todayList,
-                startDate: currentUIFormat,
-                endDate: currentUIFormat,
-              ),
-            );
-          },
+        retryCount = 0;
+        isInitialFetch = false;
+
+        if (todayList.isEmpty && yesterdayDate == null) {
+          String yesterday = DateFormat('dd-MM-yyyy').format(DateTime.now().subtract(const Duration(days: 1)));
+          return getInitialData(yesterdayDate: yesterday);
+        }
+
+        _emitSuccess(
+          ApodSuccessState(
+            apodCarouselImageList: carouselList,
+            apodImageList: todayList,
+            startDate: currentUIFormat,
+            endDate: currentUIFormat,
+            message: (yesterdayDate != null) ? "Today's APOD not yet ready. Showing latest." : null,
+          ),
         );
       },
     );
   }
 
-  // Carousel Index Update
+//  FIX 3: _emitSuccess mein "Silent Reset" ensure karein
+  void _emitSuccess(ApodSuccessState successState) {
+    // Agar current state already Success hai aur message null hai,
+    // toh dubara message mat bhejo jab tak data na badle.
+    if (state is ApodSuccessState) {
+      final oldState = state as ApodSuccessState;
+      if (oldState.message == successState.message && successState.message != null) {
+        return; // Stop the loop right here!
+      }
+    }
+
+    lastSuccessState = successState;
+    _saveToLocal(successState);
+    emit(successState);
+
+    // Message ko dikhane ke baad turant clear karo taaki loop break ho jaye
+    if (successState.message != null) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (!isClosed && state is ApodSuccessState) {
+          // Bina message ke wahi state dubara emit karo
+          emit((state as ApodSuccessState).copyWith(message: null));
+        }
+      });
+    }
+  }
+
+
+  Future<void> manualRefresh() async {
+    retryCount = 0; //  Counter reset taaki naya moka mile
+    await getInitialData();
+  }
+
   void updateCarouselIndex(int newIndex) {
     // Pehle check karo: Kya abhi hum Success state mein hain?
     if (state is ApodSuccessState) {
@@ -122,132 +379,220 @@ class ApodCubit extends Cubit<ApodState> {
     }
   }
 
-  // Date Range Update (Sirf neeche wali list ke liye)
+  //without cache
+  // Future<void> updateDateRange({
+  //   String? updatedStart,
+  //   String? updatedEnd,
+  //   bool isFallback = false,
+  // }) async {
+  //   isInitialFetch = false;
+  //
+  //   // SAFETY: Pehle current state ya cached state nikalo
+  //   final currentState = (state is ApodSuccessState)
+  //       ? state as ApodSuccessState
+  //       : lastSuccessState;
+  //   if (currentState == null) return;
+  //
+  //   final String updatedStartDateString =
+  //       updatedStart ?? currentState.startDate;
+  //   final String updatedEndDateString = updatedEnd ?? currentState.endDate;
+  //
+  //   if (updatedStartDateString.isEmpty || updatedEndDateString.isEmpty) return;
+  //
+  //   DateTime startDt = DateFormat('dd-MM-yyyy').parse(updatedStartDateString);
+  //   DateTime endDt = DateFormat('dd-MM-yyyy').parse(updatedEndDateString);
+  //
+  //   // Validation checks
+  //   if (startDt.isAfter(endDt)) {
+  //     emit(
+  //       ApodErrorState(
+  //         errorMessage: "Invalid Range: Start cannot be after End",
+  //       ),
+  //     );
+  //     return;
+  //   }
+  //
+  //   // UI UPDATE: Shimmer nahi, sirf progress bar dikhao purane data ke upar
+  //   _emitSuccess(
+  //     currentState.copyWith(
+  //       start: updatedStartDateString,
+  //       end: updatedEndDateString,
+  //       isUpdating: true,
+  //     ),
+  //   );
+  //
+  //   try {
+  //     String apiStart = DateFormat('yyyy-MM-dd').format(startDt);
+  //     String apiEnd = DateFormat('yyyy-MM-dd').format(endDt);
+  //
+  //     final response = await _repo.fetchApodList(
+  //       startDate: apiStart,
+  //       endDate: apiEnd,
+  //     );
+  //
+  //     response.fold(
+  //       (error) async {
+  //         // Error aane par loader band karo par purana data dikhate raho
+  //         _emitSuccess(currentState.copyWith(isUpdating: false));
+  //
+  //         if ((error.message.contains("not available") || error.code == 400) &&
+  //             !isFallback) {
+  //           String yesterday = DateFormat(
+  //             'dd-MM-yyyy',
+  //           ).format(DateTime.now().subtract(const Duration(days: 1)));
+  //
+  //           // Snackbar ke liye error bhejo
+  //           emit(
+  //             ApodErrorState(
+  //               errorMessage: "Data not available. Falling back...",
+  //             ),
+  //           );
+  //
+  //           // RE-SYNC: Wapas fallback call
+  //           await updateDateRange(
+  //             updatedStart: yesterday,
+  //             updatedEnd: yesterday,
+  //             isFallback: true,
+  //           );
+  //         } else {
+  //           emit(ApodErrorState(errorMessage: error.message));
+  //         }
+  //       },
+  //       (newList) {
+  //         _emitSuccess(
+  //           currentState.copyWith(
+  //             apodImageList: newList.reversed.toList(),
+  //             start: updatedStartDateString,
+  //             end: updatedEndDateString,
+  //             isUpdating: false,
+  //           ),
+  //         );
+  //       },
+  //     );
+  //   } catch (e) {
+  //     _emitSuccess(currentState.copyWith(isUpdating: false));
+  //     emit(ApodErrorState(errorMessage: "Something went wrong."));
+  //   }
+  // }
+
+  // with cache
   Future<void> updateDateRange({
     String? updatedStart,
     String? updatedEnd,
-    bool isFallback = false
+    bool isFallback = false,
   }) async {
-   // if (state is ApodSuccessState) {
-      isInitialFetch = false; // Ab ye initial fetch nahi hai
+    isInitialFetch = false;
 
-      if (updatedStart != null) {
-        limitStartDate = updatedStart; // Limit set ho gayi jitne apod img chahiye grid view mein
-      }
+    // 1. SAFETY: Current ya Cached state nikalna
+    final currentState = (state is ApodSuccessState)
+        ? state as ApodSuccessState
+        : lastSuccessState;
 
-      // 1. Check ki state valid hai ya nahi (Safety Check)
-      final currentState = (state is ApodSuccessState) ? state as ApodSuccessState : lastSuccessState;
-      if (currentState == null) return;
+    if (currentState == null) return;
 
-      // Agar start null hai toh purani wali start date use karo, agar end null hai toh purani wali end date use karo
-      final String updatedStartDateString =
-          updatedStart ??
-          currentState
-              .startDate; // if user selects new date ie user selects a new date using FROM date textfield, the new value is used otherwise todays(old) date is used
-      final String updatedEndDateString =
-          updatedEnd ??
-          currentState
-              .endDate; // if user selects new date ie user selects a new date using TO date textfield, the new value is used otherwise todays(old) date is used
+    final String updatedStartDateString =
+        updatedStart ?? currentState.startDate;
+    final String updatedEndDateString = updatedEnd ?? currentState.endDate;
 
-      // Agar dates empty hain toh aage mat badhein mtlb agr aaj ki date bhi nahi h
-      if (updatedStartDateString.isEmpty || updatedEndDateString.isEmpty) return;
+    if (updatedStartDateString.isEmpty || updatedEndDateString.isEmpty) return;
 
+    DateTime startDt = DateFormat('dd-MM-yyyy').parse(updatedStartDateString);
+    DateTime endDt = DateFormat('dd-MM-yyyy').parse(updatedEndDateString);
 
-      // converting to datetime to check ki from and to ki range sahi h aisa toh nahi from date badi ho end date se  .
-      DateTime startDt = DateFormat('dd-MM-yyyy').parse(updatedStartDateString);
-      DateTime endDt = DateFormat('dd-MM-yyyy').parse(updatedEndDateString);
-
-      //Start Date End Date se badi nahi honi chahiye
-      if (startDt.isAfter(endDt)) {
-        emit(ApodErrorState(
-            errorMessage: "Invalid Date Range: Start date cannot be after End date"));
-        return; // Yahan se return ho jao taaki API call na ho
-      }
-
-
-      //NASA APOD ki shuruat se pehle ki date nahi honi chahiye
-      DateTime nasaStartDate = DateTime(1995, 06, 16);
-      if (startDt.isBefore(nasaStartDate)) {
-        emit(ApodErrorState(
-            errorMessage: "NASA's APOD collection starts from June 16, 1995."));
-        return;
-      }
-
-      // 1. Nayi dates ke saath state emit karo (Isse UI update ho jayegi) aur Loader dikhane ke liye 'isUpdating: true' karo
-      _emitSuccess(
-        currentState.copyWith(
-          start: updatedStartDateString,
-          end: updatedEndDateString,
-          isUpdating: true,
+    // 2. Validation: Start date end se badi nahi honi chahiye
+    if (startDt.isAfter(endDt)) {
+      emit(
+        ApodErrorState(
+          errorMessage: "Invalid Range: Start cannot be after End",
         ),
       );
-      // rest all parameters are same of the ApodSuccessState like :-\
-      //             apodCarouselImageList: same old list with 5 values,
-      //             apodImageList: todays apod img when app loads for first time
-      //             else if doing this for 2nd or third time then list of apod imgs
-      //             in that range,
-      //             startDate: this changes to updatedStartDateString,
-      //             endDate: updatedEndDateString,
-      //            // currentCarouselIndex: same old index,
+      return;
+    }
 
-      try {
-        String apiStart = DateFormat('yyyy-MM-dd').format(startDt); // updating the date format of the updated date to match the format of date for ui then formatting it to match the date format of api i.e yyyy-mm-dd
-        String apiEnd = DateFormat('yyyy-MM-dd').format(endDt);
+    // 3. UI Update: Purane data ke upar loading indicator (isUpdating) dikhao
+    _emitSuccess(
+      currentState.copyWith(
+        start: updatedStartDateString,
+        end: updatedEndDateString,
+        isUpdating: true,
+      ),
+    );
 
-        debugPrint("API CALLING: Start: $apiStart, End: $apiEnd");
+    try {
+      String apiStart = DateFormat('yyyy-MM-dd').format(startDt);
+      String apiEnd = DateFormat('yyyy-MM-dd').format(endDt);
 
-        // 2. API hit karo nayi dates ke saath
-        final response = await _repo.fetchApodList(
-          startDate: apiStart,
-          endDate: apiEnd);
-        response.fold(
-          (error) async {
-            // Error aane par Loader band karo taaki UI stuck na rahe
-            _emitSuccess(currentState.copyWith(isUpdating: false));
+      final response = await _repo.fetchApodList(
+        startDate: apiStart,
+        endDate: apiEnd,
+      );
 
-            // Case A: Data Not Available (Fallback)
-            if ((error.message.contains("Date must be between")||error.message.contains("not available")||error.code == 400) && !isFallback) {
-              String yesterday = DateFormat('dd-MM-yyyy').format(DateTime.now().subtract(const Duration(days: 1)));
-
-              emit(
-                ApodErrorState(
-                  errorMessage:error.message,//"Data not available. Checking previous dates..."
-                      //"Today's APOD not available. Falling back to yesterday.",
-                ),
-              );
-              // Error dikhane ke turant baad wapas Success state pe aa jao
-              // taaki UI ko purana data mil sake
-              //emit(currentState.copyWith(isUpdating: false));
-              // Khud ko hi yesterday ki date ke sath call karo
-              // Re-syncing the state to show the last good data while we fetch fallback
-              await updateDateRange(
-                updatedStart: yesterday,
-                updatedEnd: yesterday,
-                  isFallback: true
-              );
-            } else {
-              emit(ApodErrorState(errorMessage: error.message));
-              //_emitSuccess(currentState.copyWith(isUpdating: false));
-            }
-          },
-          (newList) {
+      await response.fold(
+        (error) async {
+          // ---  NEW CACHE/OFFLINE LOGIC START ---
+          // Agar Internet Issue hai (Socket, Timeout, 503)
+          if (error.message.contains("socket") ||
+              error.message.contains("timeout") ||
+              error.message.contains("503") ||
+              error.message.contains("Host lookup")) {
+            // User ko Error screen par mat bhejo (hijack mat karo)
+            // Bas loader band karo aur purana state hi rakho with a message
             _emitSuccess(
               currentState.copyWith(
-                apodImageList: newList.reversed.toList(),
-                // bas apod img list update karo baki sab same rahega yani carousel imgs , carouel index, etc
-                start: updatedStartDateString,
-                end: updatedEndDateString,
-                isUpdating: false, //Yahan loader band hoga
+                isUpdating: false,
+                message:
+                    "Offline: Could not update range. Showing last saved data.",
               ),
             );
-          },
-        );
-      } catch (e) {
-        _emitSuccess(currentState.copyWith(isUpdating: false));
-        emit(ApodErrorState(errorMessage: "Something went wrong. Please try again."));
-      }
-  }
 
+            // Snackbar ke liye error bhej do
+            emit(ApodErrorState(errorMessage: "No internet connection."));
+            return;
+          }
+          // ---  NEW CACHE/OFFLINE LOGIC END ---
+
+          // Error aane par loader band karo
+          _emitSuccess(currentState.copyWith(isUpdating: false));
+
+          // Fallback Logic (NASA 400 error)
+          if ((error.message.contains("not available") || error.code == 400) &&
+              !isFallback) {
+            String yesterday = DateFormat(
+              'dd-MM-yyyy',
+            ).format(DateTime.now().subtract(const Duration(days: 1)));
+
+            emit(
+              ApodErrorState(
+                errorMessage: "Data not available. Falling back...",
+              ),
+            );
+
+            await updateDateRange(
+              updatedStart: yesterday,
+              updatedEnd: yesterday,
+              isFallback: true,
+            );
+          } else {
+            emit(ApodErrorState(errorMessage: error.message));
+          }
+        },
+        (newList) {
+          // SUCCESS: Naya data mil gaya, emitSuccess ise auto-save kar lega
+          _emitSuccess(
+            currentState.copyWith(
+              apodImageList: newList.reversed.toList(),
+              start: updatedStartDateString,
+              end: updatedEndDateString,
+              isUpdating: false,
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      _emitSuccess(currentState.copyWith(isUpdating: false));
+      emit(ApodErrorState(errorMessage: "Something went wrong."));
+    }
+  }
 
   // Cubit ke andar:
   Future<void> loadMoreData() async {
@@ -258,8 +603,11 @@ class ApodCubit extends Cubit<ApodState> {
     if (currentState.isLoadMoreImages) return;
 
     // 1995 ki limit check
-    DateTime currentStart = DateFormat('dd-MM-yyyy').parse(currentState.startDate);
-    if (currentStart.isBefore(DateTime(1995, 06, 17))) return; // 16 June se pehle nahi jana
+    DateTime currentStart = DateFormat(
+      'dd-MM-yyyy',
+    ).parse(currentState.startDate);
+    if (currentStart.isBefore(DateTime(1995, 06, 17)))
+      return; // 16 June se pehle nahi jana
 
     // 1. LIMIT CHECK: Agar hum pehle hi limitStartDate tak pahunch gaye hain, toh STOP
     if (limitStartDate != null && currentState.startDate == limitStartDate) {
@@ -273,14 +621,22 @@ class ApodCubit extends Cubit<ApodState> {
 
     // 2. Next Batch Dates Calculate Karein
     // currentState.startDate hamari sabse purani date hai jo abhi grid mein hai
-    DateTime currentOldest = DateFormat('dd-MM-yyyy').parse(currentState.startDate);
-    DateTime limitDt = DateFormat('dd-MM-yyyy').parse(limitStartDate ?? currentState.startDate);
+    DateTime currentOldest = DateFormat(
+      'dd-MM-yyyy',
+    ).parse(currentState.startDate);
+    DateTime limitDt = DateFormat(
+      'dd-MM-yyyy',
+    ).parse(limitStartDate ?? currentState.startDate);
 
-    DateTime nextEnd = currentOldest.subtract(const Duration(days: 1)); // Agla batch ek din pehle se shuru hoga
-    DateTime nextStart = nextEnd.subtract(const Duration(days: 15)); // 15 din piche
+    DateTime nextEnd = currentOldest.subtract(
+      const Duration(days: 1),
+    ); // Agla batch ek din pehle se shuru hoga
+    DateTime nextStart = nextEnd.subtract(
+      const Duration(days: 15),
+    ); // 15 din piche
     // 1995 ki limit check
     if (nextStart.isBefore(limitDt)) {
-      nextStart = limitDt;//DateTime(1995, 06, 16);
+      nextStart = limitDt; //DateTime(1995, 06, 16);
     }
 
     // Agar bacha hua data range ke bahar hai
@@ -296,30 +652,98 @@ class ApodCubit extends Cubit<ApodState> {
     );
 
     response.fold(
-          (error) => _emitSuccess(currentState.copyWith(isLoadMoreImages: false)),
-          (newList) {
+      (error) {
+        //Bas loader band kar do taaki user ko infinite loading na dikhe
+        _emitSuccess(currentState.copyWith(isLoadMoreImages: false));
 
-            // NASA bhejta hai: [1 Feb, 2 Feb, 3 Feb]
-            // Humein chahiye Descending: [3 Feb, 2 Feb, 1 Feb]
-            final reversedNewData = newList.reversed.toList();
+        // Agar internet nahi hai toh ek chota sa message
+        if (error.message.contains("socket")) {
+          emit(ApodErrorState(errorMessage: "No internet to load more images."));
+        }
+      },
+      (newList) {
+        // NASA bhejta hai: [1 Feb, 2 Feb, 3 Feb]
+        // Humein chahiye Descending: [3 Feb, 2 Feb, 1 Feb]
+        final reversedNewData = newList.reversed.toList();
 
-            // Purane data mein Naya data niche jod do. Purani list + Nayi list (reversed taaki descending order rahe)
+        // Purane data mein Naya data niche jod do. Purani list + Nayi list (reversed taaki descending order rahe)
         final combinedList = List<ApodModel>.from(currentState.apodImageList)
           ..addAll(reversedNewData);
 
-        _emitSuccess(currentState.copyWith(
-          apodImageList: combinedList,
-          start: DateFormat('dd-MM-yyyy').format(nextStart),
-          isLoadMoreImages: false,
-        ));
+        _emitSuccess(
+          currentState.copyWith(
+            apodImageList: combinedList,
+            start: DateFormat('dd-MM-yyyy').format(nextStart),
+            isLoadMoreImages: false,
+          ),
+        );
       },
     );
   }
 
-  // Helper method jo state emit bhi karega aur cache bhi karega
-  void _emitSuccess(ApodSuccessState state) {
-    lastSuccessState = state; // Cache update
-    emit(state);              // UI ko inform karo
+  // ApodCubit ke andar add karein
+  Future<void> retryCarousel() async {
+    if (state is! ApodSuccessState) return;
+    final currentState = state as ApodSuccessState;
+
+    // Carousel fetch karo
+    final response = await _repo.fetchApodList(count: 5);
+
+    response.fold(
+      (error) => null,
+      // Fail hua toh kuch mat karo, UI already error dikha rahi hogi
+      (newList) {
+        _emitSuccess(currentState.copyWith(apodCarouselImageList: newList));
+      },
+    );
   }
 
+
+  //old
+  // // Helper method jo state emit bhi karega aur cache bhi karega
+  // void _emitSuccess(ApodSuccessState state) {
+  //   lastSuccessState = state; // Cache update
+  //   _saveToLocal(state); //Har success state ab auto-save hogi
+  //   emit(state); // UI ko inform karo
+  //
+  //   //  TRICK: State emit karne ke turant baad, agar message tha,
+  //   // toh usey 'null' karke ek silent update bhej do taaki listener loop break ho jaye.
+  //   if (state.message != null) {
+  //     Future.delayed(const Duration(seconds: 1), () {
+  //       if (!isClosed && this.state is ApodSuccessState) {
+  //         final currentState = this.state as ApodSuccessState;
+  //         emit(currentState.copyWith(message: null));
+  //       }
+  //     });
+  //   }
+  // }
+
+  //  Local Storage mein save karne ke liye
+  Future<void> _saveToLocal(ApodSuccessState successState) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      // State ko String (JSON) bana kar save kar diya
+      await prefs.setString(_storageKey, jsonEncode(successState.toJson()));
+      debugPrint(" APOD Data Saved to Local Storage");
+    } catch (e) {
+      debugPrint(" Error saving cache: $e");
+    }
+  }
+
+  //  Local Storage se wapas load karne ke liye
+  Future<ApodSuccessState?> _loadFromLocal() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedDataString = prefs.getString(_storageKey);
+
+      if (cachedDataString != null) {
+        // String ko wapas Map aur phir State mein badla
+        final Map<String, dynamic> jsonData = jsonDecode(cachedDataString);
+        return ApodSuccessState.fromJson(jsonData);
+      }
+    } catch (e) {
+      debugPrint(" Error loading cache: $e");
+    }
+    return null;
+  }
 }

@@ -28,6 +28,7 @@ final class ApodSuccessState extends ApodState { // this state is used when the 
   final String endDate;
   final bool isUpdating;
   final bool isLoadMoreImages; // check karne ke liye ki kya aur nayi imgs lani h apod api se
+  final String? message;
 
   ApodSuccessState({
     required this.apodCarouselImageList,
@@ -37,7 +38,39 @@ final class ApodSuccessState extends ApodState { // this state is used when the 
     this.currentCarouselIndex = 0,
     this.isUpdating = false, // Default false rahega
     this.isLoadMoreImages=false,
+    this.message,
   });
+
+  ///  for shared prefrences to store apod data
+  // 1. Map mein convert karne ke liye (Save logic)
+  Map<String, dynamic> toJson() {
+    return {
+      'apodImageList': apodImageList.map((e) => e.toJson()).toList(),
+      'apodCarouselImageList': apodCarouselImageList.map((e) => e.toJson()).toList(),
+      'currentCarouselIndex': currentCarouselIndex,
+      'startDate': startDate,
+      'endDate': endDate,
+      // Baki temporary flags (isUpdating) save karne ki zarurat nahi
+    };
+  }
+
+  // 2. Map se object banane ke liye (Load logic)
+  factory ApodSuccessState.fromJson(Map<String, dynamic> json) {
+    return ApodSuccessState(
+      apodImageList: (json['apodImageList'] as List)
+          .map((e) => ApodModel.fromJson(e))
+          .toList(),
+      apodCarouselImageList: (json['apodCarouselImageList'] as List)
+          .map((e) => ApodModel.fromJson(e))
+          .toList(),
+      currentCarouselIndex: json['currentCarouselIndex'] ?? 0,
+      startDate: json['startDate'] ?? '',
+      endDate: json['endDate'] ?? '',
+      isUpdating: false, // Hamesha false rahega loading ke waqt
+      isLoadMoreImages: false,
+    );
+  }
+
 
   /* to create new box (state) while using the old data
   Flutter mein purani state ko "edit" nahi karte,instead ek Nayi State
@@ -62,6 +95,7 @@ final class ApodSuccessState extends ApodState { // this state is used when the 
     String? end,
     bool? isUpdating,
     bool? isLoadMoreImages,
+    String? message,
     }) {
     return ApodSuccessState(
       // Agar naya data aaya toh woh lo yani jo variables copywith m likhe h, warna purana hi data rehne do jo current obj mein h yani this.instanceVariable
@@ -72,6 +106,7 @@ final class ApodSuccessState extends ApodState { // this state is used when the 
       endDate: end ?? this.endDate,
       isUpdating: isUpdating ?? this.isUpdating, // Naya value ya purana
       isLoadMoreImages: isLoadMoreImages ?? this.isLoadMoreImages,
+      message: message ?? this.message,
     );
   }
 

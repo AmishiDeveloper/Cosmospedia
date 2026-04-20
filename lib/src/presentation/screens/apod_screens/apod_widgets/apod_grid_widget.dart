@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cosmospedia/src/core/app_themes/app_colors.dart';
 import 'package:cosmospedia/src/core/app_themes/text_styles.dart';
 import 'package:cosmospedia/src/core/routes/app_route.dart';
@@ -61,15 +62,33 @@ class ApodGridWidget extends StatelessWidget {
                     Hero(
                       tag: item.date.toString(),
                       // UNIQUE TAG (Matches FeatureCard & DetailScreen)
-                      child: Image.network(
-                        item.url ?? '',
+                      // child: Image.network(
+                      //   item.url ?? '',
+                      //   fit: BoxFit.cover,
+                      //   loadingBuilder: (context, child, loadingProgress) {
+                      //     if (loadingProgress == null) return child;
+                      //     //return const Center(child: CircularProgressIndicator());
+                      //     return buildImagePlaceholder();
+                      //   },
+                      //   errorBuilder: (context, error, stackTrace) => Icon(
+                      //     Icons.broken_image,
+                      //     size: 50.h,
+                      //     color: AppColors.surfaceLight,
+                      //   ),
+                      // ),
+
+                      child:CachedNetworkImage(
+                        imageUrl: item.url ?? '',
                         fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
+                        memCacheHeight: 400,
+                        memCacheWidth: 800,
+                        placeholder: (context,url) {
+                          //if (loadingProgress == null) return child;
                           //return const Center(child: CircularProgressIndicator());
                           return buildImagePlaceholder();
                         },
-                        errorBuilder: (context, error, stackTrace) => Icon(
+                        errorWidget: (context, url, error) =>
+                            Icon(
                           Icons.broken_image,
                           size: 50.h,
                           color: AppColors.surfaceLight,

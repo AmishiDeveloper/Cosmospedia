@@ -30,13 +30,19 @@ Widget asteroidMissDistanceLoadingWidget() {
             children: [
               Bone.circle(size: 30.w),
               SizedBox(width: 10.w),
-              Bone.text(words: 3),
-              Spacer(),
-              Bone(
-                borderRadius: BorderRadius.circular(8.r),
-                width: 70.w,
-                height: 25.h,
-                shape: BoxShape.rectangle,
+              Bone.text(words: 2),
+              SizedBox(width: 10.w),
+              //Spacer(),
+              Flexible(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Bone(
+                    borderRadius: BorderRadius.circular(8.r),
+                    width: 70.w,
+                    height: 25.h,
+                    shape: BoxShape.rectangle,
+                  ),
+                ),
               ),
             ],
           ),
@@ -59,53 +65,64 @@ Widget asteroidMissDistanceLoadingWidget() {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Bone(
-                      height: 120.h,
-                      borderRadius: BorderRadius.circular(6.r),
-                      width: 40.w,
-                    ),
-                    Bone.icon(size: 30.w),
-                    Bone.text(words: 1),
-                  ],
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Bone(
+                        height: 120.h,
+                        borderRadius: BorderRadius.circular(6.r),
+                        width: 40.w,
+                      ),
+                      Bone.icon(size: 30.w),
+                      Bone.text(words: 1),
+                    ],
+                  ),
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Bone(
-                      height: 120.h,
-                      borderRadius: BorderRadius.circular(6.r),
-                      width: 40.w,
-                    ),
-                    Bone.icon(size: 30.w),
-                    Bone.text(words: 1),
-                  ],
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Bone(
+                        height: 120.h,
+                        borderRadius: BorderRadius.circular(6.r),
+                        width: 40.w,
+                      ),
+                      Bone.icon(size: 30.w),
+                      Bone.text(words: 1),
+                    ],
+                  ),
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Bone(
-                      height: 120.h,
-                      borderRadius: BorderRadius.circular(6.r),
-                      width: 40.w,
-                    ),
-                    Bone.icon(size: 30.w),
-                    Bone.text(words: 1),
-                  ],
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Bone(
+                        height: 120.h,
+                        borderRadius: BorderRadius.circular(6.r),
+                        width: 40.w,
+                      ),
+                      Bone.icon(size: 30.w),
+                      Bone.text(words: 1),
+                    ],
+                  ),
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Bone(
-                      height: 120.h,
-                      borderRadius: BorderRadius.circular(6.r),
-                      width: 40.w,
-                    ),
-                    Bone.icon(size: 30.w),
-                    Bone.text(words: 1),
-                  ],
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Bone(
+                        height: 120.h,
+                        borderRadius: BorderRadius.circular(6.r),
+                        width: 40.w,
+                      ),
+                      Bone.icon(size: 30.w),
+                      Bone.text(words: 1),
+                    ],
+                  ),
                 ),
               ],
             ),

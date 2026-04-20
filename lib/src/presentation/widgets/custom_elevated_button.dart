@@ -5,6 +5,7 @@ import 'package:cosmospedia/src/core/app_themes/text_styles.dart';
 
 class CustomElevatedButton extends StatelessWidget {
   final String text;
+  final String? loadingText;
   final bool isLoading;
   final TextStyle? textStyle;
   final VoidCallback? onPressed;
@@ -24,6 +25,7 @@ class CustomElevatedButton extends StatelessWidget {
   const CustomElevatedButton({
     super.key,
     required this.text,
+    this.loadingText,
     this.isLoading = false,
     this.textStyle,
     required this.onPressed,
@@ -47,7 +49,11 @@ class CustomElevatedButton extends StatelessWidget {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         return ElevatedButton(
-          onPressed: isLoading ? null : onPressed,
+          //onPressed: isLoading ? null : onPressed,
+          onPressed: () {
+            if (isLoading) return; // Loading hai toh kuch mat karo
+            if (onPressed != null) onPressed!();
+          },
           style: ElevatedButton.styleFrom(
             elevation: elevation ?? 2,
             padding: padding ?? EdgeInsets.symmetric(horizontal: 5.w),
@@ -64,15 +70,36 @@ class CustomElevatedButton extends StatelessWidget {
             ),
           ),
           child: isLoading
-              ? SizedBox(
-                  height: 20.h, // Spinner ka size chota rakhein
-                  width: 20.w,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: textColor ?? AppColors.black,
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      height: 20.h, // Spinner ka size chota rakhein
+                      width: 20.w,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: textColor ?? AppColors.black,
+                        ),
+                      ),
                     ),
-                  ),
+
+                    // Agar loadingText null nahi hai tabhi gap aur text dikhao
+                    if (loadingText != null && loadingText!.isNotEmpty) ...[
+                      SizedBox(width: 10.w),
+                      Text(
+                        loadingText!,
+                        style:
+                            textStyle ??
+                            AppTextStyles.descriptionLargeTextStyle(
+                              context,
+                            ).copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: textColor ?? AppColors.black,
+                            ),
+                      ),
+                    ],
+                  ],
                 )
               : FittedBox(
                   child: Row(

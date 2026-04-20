@@ -10,5 +10,5 @@ final class SignUpErrorState extends SignUpState {
   final String errorMessage;
   SignUpErrorState({required this.errorMessage});
 }
-final class SignUpTogglePasswordState extends SignUpState {}
-final class SignUpToggleConfirmPasswordState extends SignUpState {}
+//final class SignUpTogglePasswordState extends SignUpState {}
+//final class SignUpToggleConfirmPasswordState extends SignUpState {}

@@ -12,16 +12,19 @@ class CustomAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 10.w,vertical: 10.h,),
-      margin: EdgeInsets.only(top: 20.h,bottom: 20.h,),
+      margin: EdgeInsets.only(bottom: 13.h,),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30.r),
         border: Border.all(width: 1,color: AppColors.textPrimaryDark,),
         color: AppColors.surfaceLight.withOpacity(0.3),
       ),
-      child: Text(
-        title,
-        style: AppTextStyles.headingMediumStyle(context),
-        textAlign: TextAlign.center,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          title,
+          style: AppTextStyles.headingMediumStyle(context),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

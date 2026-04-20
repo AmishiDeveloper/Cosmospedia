@@ -40,7 +40,6 @@ dependencies:
   dio: ^5.9.1
   pretty_dio_logger: ^1.4.0
   get_it: ^9.2.0
-  firebase_auth: ^6.1.4
   carousel_slider: ^5.1.2
   skeletonizer: ^2.1.2
   intl: ^0.20.2
@@ -49,6 +48,15 @@ dependencies:
   sticky_headers: ^0.3.0+2
   cached_network_image: ^3.4.1
   url_launcher: ^6.3.2
+
+  # FIREBASE
+  firebase_auth: ^6.1.4
+  firebase_core: ^4.7.0
+  cloud_firestore: ^6.3.0
+  firebase_messaging: ^16.2.0
+  flutter_local_notifications: ^21.0.0
+  shared_preferences: ^2.5.5
+
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +68,10 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+
+
+
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -77,6 +89,8 @@ flutter:
     - assets/images/
     - assets/gifs/
     - assets/icons/
+    - assets/data/
+    - assets/fonts/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -89,7 +103,25 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
+  fonts:
+    - family: Lora
+      fonts:
+        - asset: assets/fonts/Lora-Regular.ttf # Default (w400)
+        - asset: assets/fonts/Lora-SemiBold.ttf # w600 ke liye (Agar download ki hai)
+          weight: 600
+        - asset: assets/fonts/Lora-Bold.ttf # bold ke liye
+          weight: 700
+
+    - family: RobotoSlab
+      fonts:
+        - asset: assets/fonts/RobotoSlab-Regular.ttf
+        - asset: assets/fonts/RobotoSlab-Medium.ttf # Aapke w500 styles ke liye
+          weight: 500
+
+    - family: Merriweather
+      fonts:
+        - asset: assets/fonts/Merriweather-Regular.ttf # Aapke w400/body styles ke liye
+
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf

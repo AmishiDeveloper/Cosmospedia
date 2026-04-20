@@ -1,3 +1,4 @@
+import 'package:cosmospedia/src/core/app_themes/app_colors.dart';
 import 'package:cosmospedia/src/presentation/widgets/custom_elevated_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -22,13 +23,13 @@ class PopupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      surfaceTintColor: Colors.white,
-      elevation: 4.0,
+      surfaceTintColor: AppColors.surfaceLight,
+      elevation: 4.sp,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(6.r),
       ),
-      shadowColor: Colors.grey.shade100,
-      backgroundColor: Colors.white,
+      shadowColor: AppColors.greyShimmerShade100,
+      backgroundColor: AppColors.surfaceLight,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -40,7 +41,7 @@ class PopupScreen extends StatelessWidget {
               textAlign: TextAlign.center,
               style: GoogleFonts.poppins(
                 fontSize: 20.sp,
-                color: Colors.black,
+                color: AppColors.black,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -61,15 +62,15 @@ class PopupScreen extends StatelessWidget {
                       onTap!();
                     }
                   },
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
                   text: positiveButtonText,
                   height: 35.h,
                 ),
                 InkWell(
                   onTap: () => Navigator.pop(context),
-                  highlightColor: Colors.grey.shade300,
+                  highlightColor: AppColors.greyShimmerShade300,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                     child: Text(
                       negativeButtonText,
                       style: GoogleFonts.poppins(

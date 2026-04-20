@@ -23,6 +23,6 @@ class AsteroidDetailCubit extends Cubit<AsteroidDetailState> {
     }, (lookupModel){
       emit(AsteroidDetailSuccessState(lookupModel: lookupModel));
     });
-  }
+   }
 
 }

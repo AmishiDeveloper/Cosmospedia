@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cosmospedia/src/core/app_themes/app_colors.dart';
 import 'package:cosmospedia/src/core/app_themes/text_styles.dart';
 import 'package:cosmospedia/src/data/model/apod_model/apod_model.dart';
@@ -33,22 +34,70 @@ class ApodDetailScreen extends StatelessWidget {
               flexibleSpace: FlexibleSpaceBar(//eh batata hai ki jab hum scroll karenge, toh image kaise behave karegi.
                 background: Hero(
                   tag: heroTag, // Same tag as Grid/Carousel/feature card
-                  child: Image.network(
-                    item.hdurl??item.url??"",
+                  // child: Image.network(
+                  //   item.hdurl??item.url??"",
+                  //   fit: BoxFit.cover,
+                  //   loadingBuilder: (context, child, loadingProgress) {
+                  //     if (loadingProgress == null) return child;
+                  //     //return const Center(child: CircularProgressIndicator());
+                  //     // Jab tak HD load ho rahi hai, low-quality (already loaded) image dikhao
+                  //     return Image.network(
+                  //       item.url ?? '',
+                  //       fit: BoxFit.cover,
+                  //     );
+                  //   },
+                  //   errorBuilder: (context, error, stackTrace) => Icon(
+                  //     Icons.broken_image,
+                  //     size: 50.h,
+                  //     color: AppColors.surfaceLight,
+                  //   ),
+                  // ),
+                  child:CachedNetworkImage(
                     fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      //return const Center(child: CircularProgressIndicator());
-                      // Jab tak HD load ho rahi hai, low-quality (already loaded) image dikhao
-                      return Image.network(
-                        item.url ?? '',
+                    imageUrl:item.hdurl ?? item.url ?? 'https://www.shutterstock.com/image-vector/page-404-error-spaceman-flag-260nw-1484690978.jpg',
+                    width: double.infinity,
+                    memCacheHeight: 400,
+                    memCacheWidth: 800,
+                    placeholder: (context, url) =>
+                        CachedNetworkImage(
+                          imageUrl: item.url ?? '',
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          memCacheHeight: 400,
+                          memCacheWidth: 800,
+                        ),
+                  //       Image.network(
+                  // item.url ?? '',
+                  //   fit: BoxFit.cover,
+                  // ),
+                    errorWidget: (context, url, error) =>
+                    //     Container(
+                    //   color: AppColors.textPrimaryDark.withOpacity(0.3),
+                    //   child:
+                    //   Center(
+                    //     child: Icon(
+                    //       Icons.broken_image,
+                    //       color: AppColors.surfaceLight,
+                    //       size: 50.r,
+                    //     ),
+                    //   ),
+                    // ),
+                    Container(
+                      color: AppColors.textPrimaryDark,
+                      // child: Center(
+                      //   child: Icon(
+                      //     Icons.broken_image,
+                      //     color: AppColors.surfaceLight,
+                      //     size: 40.r,
+                      //   ),
+                      // ),
+                      child:CachedNetworkImage(
                         fit: BoxFit.cover,
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) => Icon(
-                      Icons.broken_image,
-                      size: 50.h,
-                      color: AppColors.surfaceLight,
+                        imageUrl:'https://media.istockphoto.com/id/692243858/photo/exoplanet-in-deep-space.jpg?s=612x612&w=0&k=20&c=KQ7B3RI8_D3qeD06RtE7IuEyiDHnLGDg-Hqp8Fe8PXU=',
+                        width: double.infinity,
+                        memCacheHeight: 400,
+                        memCacheWidth: 800,
+                      ),
                     ),
                   ),
                 ),

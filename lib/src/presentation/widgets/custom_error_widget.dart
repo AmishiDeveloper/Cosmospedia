@@ -7,9 +7,11 @@ import 'custom_elevated_button.dart';
 
 class CustomErrorWidget extends StatelessWidget {
   final String errorMessage;
-  final VoidCallback onRetry; // API dobara hit karne ke liye function
+  //Future<void> Function() ya VoidCallback dono chalenge
+  final Function onRetry; // API dobara hit karne ke liye function
+  final ValueNotifier<bool> _isRetrying = ValueNotifier<bool>(false);
 
-  const CustomErrorWidget({
+  CustomErrorWidget({
     super.key,
     required this.errorMessage,
     required this.onRetry,
@@ -25,45 +27,12 @@ class CustomErrorWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 1. Astronaut Image/Animation
-              // Aap Image.asset ya Lottie.asset use kar sakti hain
-              // Icon(
-              //   Icons.rocket_outlined, // Placeholder, yahan astronaut image lagayein
-              //   size: 100.sp,
-              //   color: AppColors.surfaceLight.withOpacity(0.5),
-              // ),
-
-              // Container(
-              //   height: 240.h,
-              //   decoration: BoxDecoration(
-              //     shape: BoxShape.circle,
-              //     boxShadow: [
-              //       BoxShadow(
-              //         color: AppColors.textPrimaryDark.withOpacity(0.3), // Glow ka color
-              //         blurRadius: 70, // Jitna zyada, utna faila hua glow
-              //         spreadRadius: 1, // Shadow ka gherao
-              //       ),
-              //     ],
-              //   ),
-              //   child: Image.asset(
-              //     AppImages.floatingAstronaut,
-              //     fit: BoxFit.contain,
-              //   ),
-              // ),
 
               Image.asset(
                 AppImages.floatingAstronaut,
                 //fit: BoxFit.contain,
                 height: 240.h,
               ),
-
-              // BackdropFilter(
-              //   filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2), // Blur intensity
-              //   child: Image.asset(
-              //     AppImages.floatingAstronaut,
-              //     height: 240.h,
-              //   ),
-              // ),
 
               Text(
                 'Whoops...',
@@ -100,18 +69,39 @@ class CustomErrorWidget extends StatelessWidget {
               SizedBox(height: 15.h),
 
               // 3. Retry Button
-              CustomElevatedButton(
-                onPressed: onRetry,
-                text: 'Try Again',
-                textStyle:  AppTextStyles.descriptionLargeTextStyle(
-                  context,
-                ).copyWith(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.black,
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                height: 45.h,
+              ValueListenableBuilder(
+                valueListenable: _isRetrying,
+                builder: (context, isLoading, child) {
+                  return CustomElevatedButton(
+                    isLoading: isLoading,
+                    loadingText: 'Trying Again...',
+                    onPressed: () async {
+                      //Result nikalo function ko call karke
+                      final result= onRetry();
+
+                      // 2. Check karo kya result Future hai?
+                      if (result is Future) {
+                        _isRetrying.value = true;
+
+                        try {
+                          await result;
+                        } finally {
+                          _isRetrying.value = false;
+                        }
+                      }
+                    },//onRetry,
+                    text: 'Try Again',
+                    textStyle:  AppTextStyles.descriptionLargeTextStyle(
+                      context,
+                    ).copyWith(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.black,
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    height: 45.h,
+                  );
+                }
               ),
 
             ],

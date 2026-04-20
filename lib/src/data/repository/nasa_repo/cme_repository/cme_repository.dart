@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:cosmospedia/src/core/utils/response_type_def.dart';
 import 'package:cosmospedia/src/data/model/cme_models/cme_analysis_model/cme_analysis_model.dart';
 import 'package:cosmospedia/src/data/model/cme_models/cme_model/cme_model.dart';
 import 'package:cosmospedia/src/data/network/custom_dio_exceptions.dart';
 import 'package:cosmospedia/src/data/network/data_source/nasa/cme_api_service/cme_api_service.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:fpdart/fpdart.dart';
 
 class CmeRepository {
@@ -33,11 +35,24 @@ class CmeRepository {
       } else {
         return left(CustomError("No CME events found", 204));
       }
-    } on DioException catch (e) {
-      String customException = CustomDioExceptions.fromDioException(e).toString();
-      return left(CustomError(customException, e.response?.statusCode));
-    } catch (e) {
-      return left(CustomError("CME Events Data Format Error: ${e.toString()}", 500));
+    }
+    // on DioException catch (e) {
+    //   String customException = CustomDioExceptions.fromDioException(e).toString();
+    //   return left(CustomError(customException, e.response?.statusCode));
+    // }
+    catch (e) {
+      //return left(CustomError("CME Events Data Format Error: ${e.toString()}", 500));
+
+      // 🎯 FALLBACK LOGIC: Agar NASA ka server down hai
+      if (_shouldFallback(e)) {
+        print("🎯 Connection refused detected! Switching to Mock Data...");
+        return await _loadCmeMockData();
+      }
+
+      // Baaki errors ke liye normal handling
+      String errorMessage = _getErrorMessage(e);
+      return left(CustomError(errorMessage, 500));
+
     }
   }
 
@@ -63,12 +78,74 @@ class CmeRepository {
       } else {
         return left(CustomError("No CME Analysis reports found", 204));
       }
-    } on DioException catch (e) {
-      String customException = CustomDioExceptions.fromDioException(e).toString();
-      return left(CustomError(customException, e.response?.statusCode));
-    } catch (e) {
-      return left(CustomError("CME Analysis Data Format Error: ${e.toString()}", 500));
+    }
+    //on DioException catch (e) {
+    //   String customException = CustomDioExceptions.fromDioException(e).toString();
+    //   return left(CustomError(customException, e.response?.statusCode));
+    // }
+    catch (e) {
+      //return left(CustomError("CME Analysis Data Format Error: ${e.toString()}", 500));
+
+      // 🎯 FALLBACK LOGIC: Agar NASA ka server down hai
+      if (_shouldFallback(e)) {
+        print("🎯 Connection refused detected! Switching to Mock Data of Analysis...");
+    return await _loadCmeAnalysisMockData();
+    }
+
+    // Baaki errors ke liye normal handling
+    String errorMessage = _getErrorMessage(e);
+    return left(CustomError(errorMessage, 500));
+
     }
   }
 
+}
+
+// Check karna ki kya error NASA server outage se related hai
+bool _shouldFallback(Object e) {
+  String err = e.toString().toLowerCase();
+  return err.contains("503") ||
+      err.contains("refused") ||
+      err.contains("timeout") ||
+      err.contains("failure") ||
+      err.contains("upstream") ||
+      err.contains("disconnect");
+}
+
+// Generic error message extractor
+String _getErrorMessage(Object e) {
+  if (e is DioException) {
+    return CustomDioExceptions.fromDioException(e).toString();
+  }
+  return e.toString();
+}
+
+// 📂 Local JSON load karne ka logic (Tab 1 ke liye)
+FutureResult<List<CmeModel>> _loadCmeMockData() async {
+  try {
+    print("🚀 Loading CME Mock Data from assets...");
+    final String response = await rootBundle.loadString('assets/data/cme_demo_data.json');
+    final List<dynamic> data = json.decode(response);
+    final List<CmeModel> models = data.map((json) => CmeModel.fromJson(json)).toList();
+    return right(models);
+  } catch (e) {
+    return left(CustomError("Failed to load Demo Data: ${e.toString()}", 500));
+  }
+}
+
+// 📂 Analysis Mock Data load karne ka logic
+FutureResult<List<CmeAnalysisModel>> _loadCmeAnalysisMockData() async {
+  try {
+    print("🚀 Loading CME Analysis Mock Data...");
+    final String response = await rootBundle.loadString('assets/data/cme_analysis_demo_data.json');
+    final List<dynamic> data = json.decode(response);
+
+    final List<CmeAnalysisModel> models = data
+        .map((json) => CmeAnalysisModel.fromJson(json))
+        .toList();
+
+    return right(models);
+  } catch (e) {
+    return left(CustomError("Failed to load Analysis Demo Data", 500));
+  }
 }

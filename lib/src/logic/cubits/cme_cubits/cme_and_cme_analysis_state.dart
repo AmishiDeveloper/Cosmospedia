@@ -24,6 +24,12 @@ final class CmeAndCmeAnalysisSuccessState extends CmeAndCmeAnalysisState {
   final int? cmeExpansionTileExpandedIndex; // New Variable: null matlab koi card open nahi h
   final double impactProbability;
 
+  // 🎯 New Variables for Demo Mode
+  final bool isDemoMode;
+  final DateTime calendarFirstDate;
+  final DateTime calendarLastDate;
+  final String? message;
+
   CmeAndCmeAnalysisSuccessState({
     required this.cmeData,required this.cmeAnalysis,
     required this.startDate,
@@ -32,6 +38,11 @@ final class CmeAndCmeAnalysisSuccessState extends CmeAndCmeAnalysisState {
     this.isUpdating = false,
     this.cmeExpansionTileExpandedIndex,//initially null
     required this.impactProbability,
+
+    this.isDemoMode = false,
+    required this.calendarFirstDate,
+    required this.calendarLastDate,
+    this.message,
   });
 
   CmeAndCmeAnalysisSuccessState copyWith({
@@ -44,6 +55,12 @@ final class CmeAndCmeAnalysisSuccessState extends CmeAndCmeAnalysisState {
     int? cmeExpansionTileExpandedIndex,
     double? impactProbability,
     bool forceNull = false, // Null set karne ke liye
+
+    bool? isDemoMode,
+    DateTime? calendarFirstDate,
+    DateTime? calendarLastDate,
+    String? message,
+
   }) {
     return CmeAndCmeAnalysisSuccessState(
       cmeData: cmeData ?? this.cmeData, // ?? se phele ye current obj ke copy with ke variables h aur ?? ke baad jo initially obj m data tha voh
@@ -56,6 +73,12 @@ final class CmeAndCmeAnalysisSuccessState extends CmeAndCmeAnalysisState {
       cmeExpansionTileExpandedIndex: forceNull
           ? null
           : (cmeExpansionTileExpandedIndex ?? this.cmeExpansionTileExpandedIndex),
+
+      isDemoMode: isDemoMode ?? this.isDemoMode,
+      calendarFirstDate: calendarFirstDate ?? this.calendarFirstDate,
+      calendarLastDate: calendarLastDate ?? this.calendarLastDate,
+      message: message ?? this.message,
+
     );
   }
 }

@@ -37,13 +37,57 @@ class ApodRepository {
   ApodRepository(this._apodApiService);
 
   /// Fetch apod data
-  // FutureResult: Iska matlab hai ki result do cheezon mein se ek hoga: CustomError ya List<ApodModel>.
-  FutureResult<List<ApodModel>> fetchApodList(
-      {int? count, String? startDate, String? endDate}) async {
+  // // FutureResult: Iska matlab hai ki result do cheezon mein se ek hoga: CustomError ya List<ApodModel>.
+  // FutureResult<List<ApodModel>> fetchApodList(
+  //     {int? count, String? startDate, String? endDate}) async {
+  //
+  //   //try { ... } on DioException catch (e) { ... }
+  //   //Internet se data mangwana khatarnak ho sakta hai. try matlab "Koshish karo", aur agar crash ho (jaise internet band ho), toh catch use sambhaal lega taaki app band na ho.
+  //
+  //   try {
+  //     var response = await _apodApiService.fetchApodData(
+  //       count: count,
+  //       start: startDate,
+  //       end: endDate,
+  //     );
+  //
+  //     //Data Conversion (JSON to Model)
+  //     //NASA kabhi ek image bhejta hai (Map) aur kabhi 5 images (List of map).
+  //     final data = response.data;
+  //
+  //     /*
+  //     If data is List: Matlab bahut saari images hain. Har ek json ko uthao aur ApodModel.fromJson
+  //     ke machine mein daal kar Model bana do.
+  //     */
+  //     if (data is List) {
+  //       final List<ApodModel> models = data.map((json) => ApodModel.fromJson(json)).toList();
+  //       return right(models);
+  //     }
+  //     else { //Else: Matlab sirf ek image aayi hai. Use bhi list mein daal kar bhej do taaki UI ko hamesha list hi mile.
+  //       final ApodModel model = ApodModel.fromJson(data);
+  //       return right([model]);
+  //     }
+  //     // final model = apodModelFromJson(response.toString());
+  //     // return right(model);
+  //
+  //
+  //     /*Agar error aaya (jaise 404 ya No Internet), toh hum ganda sa technical error nahi dikhayenge.
+  //     CustomDioExceptions class will convert the error into easy language (jaise 'No Internet')"*/
+  //   } on DioException catch (e) {
+  //     String customException = CustomDioExceptions
+  //         .fromDioException(e)
+  //         .toString();
+  //     CustomError error = CustomError(customException, e.response?.statusCode);
+  //     // error is packed on the left and returned
+  //     return left(error);
+  //   }
+  // }
 
-    //try { ... } on DioException catch (e) { ... }
-    //Internet se data mangwana khatarnak ho sakta hai. try matlab "Koshish karo", aur agar crash ho (jaise internet band ho), toh catch use sambhaal lega taaki app band na ho.
-
+  FutureResult<List<ApodModel>> fetchApodList({
+    int? count,
+    String? startDate,
+    String? endDate,
+  }) async {
     try {
       var response = await _apodApiService.fetchApodData(
         count: count,
@@ -51,35 +95,55 @@ class ApodRepository {
         end: endDate,
       );
 
-      //Data Conversion (JSON to Model)
-      //NASA kabhi ek image bhejta hai (Map) aur kabhi 5 images (List of map).
       final data = response.data;
 
-      /*
-      If data is List: Matlab bahut saari images hain. Har ek json ko uthao aur ApodModel.fromJson
-      ke machine mein daal kar Model bana do.
-      */
+      if (data == null) {
+        return left(CustomError("NASA didn't send any data. Please try again.", 404));
+      }
+
+      //2. 1. Sabse pehle List check karo (Range calls ke liye).List Parsing (Jab multiple images aati hain)
       if (data is List) {
-        final List<ApodModel> models = data.map((json) => ApodModel.fromJson(json)).toList();
+        final List<ApodModel> models = data
+            .map((json) => ApodModel.fromJson(json as Map<String, dynamic>))
+            .toList();
         return right(models);
       }
-      else { //Else: Matlab sirf ek image aayi hai. Use bhi list mein daal kar bhej do taaki UI ko hamesha list hi mile.
-        final ApodModel model = ApodModel.fromJson(data);
+
+      //3. Phir Map check karo (Single date calls ke liye).Map Parsing (Jab single image aati hai)
+      if (data is Map<String, dynamic>) { //  Direct Map check
+        final model = ApodModel.fromJson(data);
         return right([model]);
       }
-      // final model = apodModelFromJson(response.toString());
-      // return right(model);
 
+      // Agar upar ke dono cases fail ho jayein toh ye return hona chahiye
+      return left(CustomError("Received Unexpected data format from NASA", 500));
 
-      /*Agar error aaya (jaise 404 ya No Internet), toh hum ganda sa technical error nahi dikhayenge.
-      CustomDioExceptions class will convert the error into easy language (jaise 'No Internet')"*/
     } on DioException catch (e) {
-      String customException = CustomDioExceptions
-          .fromDioException(e)
-          .toString();
-      CustomError error = CustomError(customException, e.response?.statusCode);
-      // error is packed on the left and returned
-      return left(error);
+      String customMsg;// = CustomDioExceptions.fromDioException(e).toString();
+      int? statusCode = e.response?.statusCode;
+
+      if (statusCode == 500) {
+        customMsg = "NASA's APOD service is temporarily struggling.";
+      }
+      else if (statusCode == 503 || statusCode == 504) {
+        customMsg = "NASA's APOD service is currently overloaded. Please try again in a bit.";
+      } else if (statusCode == 403 || statusCode == 429) {
+        customMsg = "NASA API limit reached. Try again later.";
+      } else if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+        customMsg = "NASA server took too long to respond. Connection timed out.";
+      } else if (e.message?.toLowerCase().contains('socket') ?? false) {
+        customMsg = "No internet connection. Check your network.";
+      } else if (e.response?.data is String && (e.response?.data as String).toLowerCase().contains("<html")) {
+        customMsg = "NASA server is busy or the date range is too large. Try a shorter range.";
+      } else {
+        // Agar upar ka kuch match nahi hua, toh purana generic handler use karo
+        customMsg = CustomDioExceptions.fromDioException(e).toString();
+      }
+      return left(CustomError(customMsg, statusCode));
+
+    } catch (e) {
+      // Kisi bhi aur anjaan error ke liye ye catch block zaroori hai
+      return left(CustomError("Unexpected Error: ${e.toString()}", 500));
     }
   }
 }

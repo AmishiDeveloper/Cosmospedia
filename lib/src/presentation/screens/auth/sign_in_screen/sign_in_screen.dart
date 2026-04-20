@@ -49,6 +49,8 @@ class _SignInScreenState extends State<SignInScreen> {
   late TextEditingController _forgotEmailController;
   late FocusNode _forgotEmailFocusNode;
 
+  final ValueNotifier<bool> isPasswordVisible = ValueNotifier<bool>(false);
+
   @override
   void initState() {
     // used for initialization. this method allocates memory space.
@@ -112,7 +114,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   child: const NavigationBarScreen(),
                 ),
               ),
-                  (Route<dynamic> route) => false,
+              (Route<dynamic> route) => false,
             );
           }
         },
@@ -186,7 +188,8 @@ class _SignInScreenState extends State<SignInScreen> {
                               return 'Email is required';
                             }
                             if (!RegularExpressions.emailRegex.hasMatch(
-                              value)) {
+                              value,
+                            )) {
                               return 'Enter valid email Address';
                             }
                             return null;
@@ -195,55 +198,62 @@ class _SignInScreenState extends State<SignInScreen> {
 
                         SizedBox(height: 20.h),
 
-                        CustomTextField(
-                          controller: _passwordController,
-                          focusNode: _passwordFocus,
-                          onFieldSubmitted: (v) {
-                            // either make keyboard go down or
-                            _passwordFocus.unfocus();
+                        ValueListenableBuilder(
+                          valueListenable: isPasswordVisible,
+                          builder: (context, bool visible, child) {
+                            return CustomTextField(
+                              controller: _passwordController,
+                              focusNode: _passwordFocus,
+                              onFieldSubmitted: (v) {
+                                // either make keyboard go down or
+                                _passwordFocus.unfocus();
 
-                            // directly start sign in on clicking the done/enter button in keyboard without clicking sigin button
-                            // if (_formKey.currentState!.validate()) {
-                            //   context.read<SignInCubit>().signIn(
-                            //     email: _emailController.text.trim(),
-                            //     password: _passwordController.text,
-                            //   );
-                            // }
-                          },
-                          textInputAction: TextInputAction.done,
-                          obscureText: !cubit.isPasswordVisible,
-                          // eye close if pwd visible if eye open then pwd not visible
-                          hintText: 'Password',
-                          labelText: 'Password',
-                          prefix: Icon(
-                            Icons.lock,
-                            size: 20.r,
-                            color: AppColors.textPrimaryDark,
-                          ),
-                          suffix: IconButton(
-                            icon: Icon(
-                              cubit.isPasswordVisible
-                                  ? Icons.visibility_sharp
-                                  : Icons.visibility_off_sharp,
-                            ),
-                            iconSize: 20.r,
-                            color: AppColors.textPrimaryDark,
-                            onPressed: () {
-                              cubit.togglePassword(cubit.isPasswordVisible);
-                            },
-                          ),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.deny(RegExp(r'\s')),
-                          ],
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Password is required';
-                            }
-                            if (!RegularExpressions.passwordRegex.hasMatch(
-                              value)) {
-                              return 'Enter valid password (8-15 characters).';
-                            }
-                            return null;
+                                // directly start sign in on clicking the done/enter button in keyboard without clicking sigin button
+                                // if (_formKey.currentState!.validate()) {
+                                //   context.read<SignInCubit>().signIn(
+                                //     email: _emailController.text.trim(),
+                                //     password: _passwordController.text,
+                                //   );
+                                // }
+                              },
+                              textInputAction: TextInputAction.done,
+                              obscureText: !visible,
+                              // eye close if pwd visible if eye open then pwd not visible
+                              hintText: 'Password',
+                              labelText: 'Password',
+                              prefix: Icon(
+                                Icons.lock,
+                                size: 20.r,
+                                color: AppColors.textPrimaryDark,
+                              ),
+                              suffix: IconButton(
+                                icon: Icon(
+                                  visible
+                                      ? Icons.visibility_sharp
+                                      : Icons.visibility_off_sharp,
+                                ),
+                                iconSize: 20.r,
+                                color: AppColors.textPrimaryDark,
+                                onPressed: () {
+                                  isPasswordVisible.value =
+                                      !isPasswordVisible.value;
+                                },
+                              ),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                              ],
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Password is required';
+                                }
+                                if (!RegularExpressions.passwordRegex.hasMatch(
+                                  value,
+                                )) {
+                                  return 'Min. 8-15 non-space chars, 1 uppercase, 1 lowercase, 1 digit & 1 special char.';
+                                }
+                                return null;
+                              },
+                            );
                           },
                         ),
 
@@ -251,11 +261,17 @@ class _SignInScreenState extends State<SignInScreen> {
 
                         CustomElevatedButton(
                           isLoading: state is SignInLoadingState,
+                          loadingText: 'Signing in...',
                           text: 'Sign in',
                           width: double.infinity,
                           onPressed: () {
+                            FocusScope.of(context).unfocus();
+
                             if (_formKey.currentState!.validate()) {
-                              //context.read<SignInCubit>().init();
+                              context.read<SignInCubit>().signIn(
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text.trim(),
+                              );
                             }
                           },
                         ),
@@ -283,112 +299,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
                         TextButton(
                           onPressed: () {
-                            showCustomCosmosDialog(
-                              context,
-                              child: Form(
-                                key: _dialogFormKey,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  // Utni hi jagah lega jitni zaroorat hai
-                                  children: [
-                                    // 1. Header (Logo/Icon) - Easily changeable
-                                    Icon(Icons.rocket_launch, size: 70.h),
-
-                                    SizedBox(height: 15.h),
-
-                                    // 2. Title
-                                    Text(
-                                      "Reset Password",
-                                      style: AppTextStyles.headingMediumStyle(
-                                        context,
-                                      ).copyWith(color: AppColors.black,
-                                      ),
-                                    ),
-
-                                    SizedBox(height: 10.h),
-
-                                    // 3. Body (TextField)
-                                    CustomTextField(
-                                      controller: _forgotEmailController,
-                                      focusNode: _forgotEmailFocusNode,
-                                      hintText: "Email",
-                                      hintStyle: AppTextStyles.descriptionMediumTextStyle(context).copyWith(
-                                        fontWeight: FontWeight.w400,
-                                        color: AppColors.textSecondaryLight,
-                                      ),
-                                      labelText: 'Email',
-                                      labelStyle: AppTextStyles.descriptionMediumTextStyle(context).copyWith(
-                                        fontWeight: FontWeight.w400,
-                                        color: AppColors.textSecondaryLight,
-                                      ),
-                                      textStyle:  AppTextStyles.descriptionMediumTextStyle(context).copyWith(
-                                          fontWeight: FontWeight.w400,
-                                          color: AppColors.black,
-                                      ),
-                                      onFieldSubmitted: (v) {
-                                        _forgotEmailFocusNode.unfocus();
-                                      },
-                                      prefix: Icon(
-                                        Icons.email,
-                                        size: 20.r,
-                                        color: AppColors.textSecondaryLight,
-                                      ),
-                                      focusedBorderColor: AppColors.black,
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.allow(
-                                          RegularExpressions.emailInput,
-                                        ),
-                                      ],
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Email is required';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-
-                                     SizedBox(height: 15.h),
-
-                                    // 4. Footer (Action Button)
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-
-                                        TextButton(
-                                            onPressed: () {
-                                              if (_dialogFormKey.currentState!.validate()) {
-                                                //         // Agar valid hai toh logic yahan likhein
-                                                print("Email: ${_forgotEmailController.text}",
-                                                );
-                                                Navigator.pop(context);
-                                              }
-                                            },
-                                            child: Text('Send Reset Link',
-                                              style:AppTextStyles.headingMediumStyle(context).
-                                              copyWith(
-                                                  color:AppColors.textDeepPurple,
-                                              ),
-                                            ),
-                                        ),
-
-                                        TextButton(
-                                          onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                          child: Text(
-                                            'Cancel',
-                                            style:AppTextStyles.headingMediumStyle(context).
-                                            copyWith(
-                                                color:AppColors.textDeepPurple,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
+                            _forgotEmailController.clear();
+                            _showForgotPasswordDialog(context);
                           },
                           child: Text(
                             'Forgot Password',
@@ -405,6 +317,124 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Future<void> _showForgotPasswordDialog(BuildContext context) {
+    return showCustomCosmosDialog(
+      context,
+      child: Form(
+        key: _dialogFormKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          // Utni hi jagah lega jitni zaroorat hai
+          children: [
+            // 1. Header (Logo/Icon) - Easily changeable
+            Icon(Icons.rocket_launch, size: 70.h),
+
+            SizedBox(height: 15.h),
+
+            // 2. Title
+            Text(
+              "Reset Password",
+              style: AppTextStyles.headingMediumStyle(
+                context,
+              ).copyWith(color: AppColors.black),
+            ),
+
+            SizedBox(height: 10.h),
+
+            // 3. Body (TextField)
+            CustomTextField(
+              controller: _forgotEmailController,
+              focusNode: _forgotEmailFocusNode,
+              hintText: "Email",
+              hintStyle: AppTextStyles.descriptionMediumTextStyle(context)
+                  .copyWith(
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textSecondaryLight,
+                  ),
+              labelText: 'Email',
+              labelStyle: AppTextStyles.descriptionMediumTextStyle(context)
+                  .copyWith(
+                    fontWeight: FontWeight.w400,
+                    color: AppColors.textSecondaryLight,
+                  ),
+              textStyle: AppTextStyles.descriptionMediumTextStyle(
+                context,
+              ).copyWith(fontWeight: FontWeight.w400, color: AppColors.black),
+              onFieldSubmitted: (v) {
+                _forgotEmailFocusNode.unfocus();
+              },
+              prefix: Icon(
+                Icons.email,
+                size: 20.r,
+                color: AppColors.textSecondaryLight,
+              ),
+              focusedBorderColor: AppColors.black,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(
+                  RegularExpressions.emailInput,
+                ),
+              ],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Email is required';
+                }
+                return null;
+              },
+            ),
+
+            SizedBox(height: 15.h),
+
+            // 4. Footer (Action Button)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    if (_dialogFormKey.currentState!.validate()) {
+                      print("Email: ${_forgotEmailController.text}");
+
+                      context.read<SignInCubit>().resetPassword(
+                        email: _forgotEmailController.text.trim(),
+                      );
+
+                      _forgotEmailController.clear();
+                      Navigator.pop(context);
+
+                      showCustomSnackBar(
+                        context: context,
+                        message: "Reset link sent to your email!",
+                        success: true,
+                      );
+                    }
+                  },
+                  child: Text(
+                    'Send Reset Link',
+                    style: AppTextStyles.headingMediumStyle(
+                      context,
+                    ).copyWith(color: AppColors.textDeepPurple),
+                  ),
+                ),
+
+                TextButton(
+                  onPressed: () {
+                    _forgotEmailController.clear();
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'Cancel',
+                    style: AppTextStyles.headingMediumStyle(
+                      context,
+                    ).copyWith(color: AppColors.textDeepPurple),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

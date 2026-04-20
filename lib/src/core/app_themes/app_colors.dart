@@ -31,7 +31,13 @@ class AppColors {
   static const Color textPrimaryDark = Color(0xFFE0E0E0);
   static const Color textSecondaryDark = Color(0xFF9E9E9E);
   static const Color textDeepPurple= Color(0xFF673AB7);
+  static const Color purpleShade900= Color(0xFF48148C);
   static const Color textPurple= Color(0xFF9C20B7);
+  static const Color purple= Color(0xFF9C27B0);
+  static const Color purpleShade700= Color(0xFF7B1FA2);
+  static const Color purpleShade400= Color(0xFFAB47BC);
+  static const Color pink= Color(0xFFE91E63);
+
 
   //Shimmer colors
   static const Color greyShimmerShade50 = Color(0xFFFAFAFA);
@@ -41,20 +47,24 @@ class AppColors {
   static const Color greyShimmerShade400 = Color( 0xFFBDBDBD);
   static const Color greyShimmer = Color(0xFF9E9E9E);
   static const Color greyShimmerShade600 = Color(0xFF757575);
+  static const Color whiteShimmer = Color(0x62FFFFFF);
   static const Color greyShimmerShade700 = Color(0xFF616161);
   static const Color greyShimmerShade800 = Color(0xFF424242);
   static const Color greyShimmerShade850 = Color(0xFF303030);
   static const Color greyShimmerShade900 = Color(0xFF212121);
-  static const Color whiteShimmer = Color(0x62FFFFFF);
+
 
   // Error Colors
-  static const Color error = Color(0xFFF44336);
   static const Color orangeShade800 = Color(0xFFEF6C00);
+  static const Color error = Color(0xFFF44336);
   static const Color errorDark = Color(0xFFCF6679);
 
   // Success Colors
   static const Color success = Color(0xFF4CAF50);
   static const Color successDark = Color(0xFF81C784);
+  static const Color tealShade700 = Color(0xFF007963);
+  static const Color tealShade400 = Color(0xFF26A69A);
+  static const Color teal = Color(0xFF00968B);
 
   // Warning Colors
   static const Color warning = Color(0xFFFFA000);
@@ -63,8 +73,18 @@ class AppColors {
   static const Color yellow = Color(0xFFFFEB35);
 
   // Info Colors
-  static const Color info = Color(0xFF2196F3);
+
+  static const Color cyan = Color(0xFF00BCD4);
   static const Color infoDark = Color(0xFF64B5F6);
+  static const Color blueShade400 = Color(0xFF42A5F5);
+  static const Color info = Color(0xFF2196F3);
+  static const Color blueShade700 = Color(0xFF1976D2);
+  static const Color blueShade900 = Color(0xFF0D47A1);
+
+
+
+
+
 
   //Bottom navigation bar colors
   static  Color bottomNavColor = const Color(0xFFFFFFFF).withOpacity(0.2);

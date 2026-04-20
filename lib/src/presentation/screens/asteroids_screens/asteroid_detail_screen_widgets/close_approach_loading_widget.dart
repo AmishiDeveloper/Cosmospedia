@@ -30,8 +30,9 @@ Widget closeApproachLoadingWidget() {
             children: [
               Bone.circle(size: 40.w),
               SizedBox(width: 10.w),
-              Bone.text(words: 3),
-              Spacer(),
+              Expanded(child: Bone.text(words: 3)),
+              //Spacer(),
+              SizedBox(width: 30.w),
               Bone(
                 borderRadius: BorderRadius.circular(8.r),
                 width: 35.w,

@@ -74,10 +74,20 @@ class _AsteroidDetailScreenState extends State<AsteroidDetailScreen> {
           preferredSize: Size.fromHeight(70.h),
           child: AppBar(
             centerTitle: true,
+            leading: Padding(
+              padding: EdgeInsets.all(8.w),
+              child: IconButton(
+                icon:  Icon(Icons.arrow_back_ios_rounded, color: AppColors.surfaceLight),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
             backgroundColor: Colors.transparent,
             surfaceTintColor: Colors.transparent,
-            automaticallyImplyLeading: false,
-            title: CustomAppBar(title: 'Asteroid Insights'),
+            automaticallyImplyLeading: true,
+            title: Padding(
+              padding: EdgeInsets.only(top:10.h),
+              child: CustomAppBar(title: 'Asteroid Insights'),
+            ),
           ),
         ),
         body: customBackgroundWidget(
@@ -111,36 +121,40 @@ class _AsteroidDetailScreenState extends State<AsteroidDetailScreen> {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  widget.name,
-                                  style: AppTextStyles.headingMediumStyle(
-                                    context,
+                                FittedBox(
+                                  child: Text(
+                                    widget.name,
+                                    style: AppTextStyles.headingMediumStyle(
+                                      context,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    softWrap: true,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
                                   ),
-                                  textAlign: TextAlign.center,
-                                  softWrap: true,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
                                 ),
 
                                 SizedBox(height: 5.h),
 
-                                Text(
-                                  'Asteroid ID: ${widget.asteroidId}',
-                                  style:
-                                      AppTextStyles.descriptionLargeTextStyle(
-                                        context,
-                                      ),
-                                  textAlign: TextAlign.center,
+                                FittedBox(
+                                  child: Text(
+                                    'Asteroid ID: ${widget.asteroidId}',
+                                    style:
+                                        AppTextStyles.descriptionLargeTextStyle(
+                                          context,
+                                        ),
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ),
                               ],
                             ),
 
-                            // SizedBox(width: 15.w),
+                             SizedBox(width: 5.w),
 
                             // safe/ hazardous container
                             Container(
                               padding: EdgeInsets.symmetric(
-                                horizontal: 30.w,
+                                horizontal: widget.isHazardous? 10.w :22.w,
                                 vertical: 4.h,
                               ),
                               decoration: BoxDecoration(
@@ -176,13 +190,15 @@ class _AsteroidDetailScreenState extends State<AsteroidDetailScreen> {
                                     color: AppColors.surfaceLight,
                                   ),
 
-                                  Text(
-                                    widget.isHazardous ? 'Dangerous' : 'Safe',
-                                    style:
-                                        AppTextStyles.descriptionLargeTextStyle(
-                                          context,
-                                        ),
-                                    textAlign: TextAlign.center,
+                                  FittedBox(
+                                    child: Text(
+                                      widget.isHazardous ? 'Dangerous' : 'Safe',
+                                      style:
+                                          AppTextStyles.descriptionLargeTextStyle(
+                                            context,
+                                          ),
+                                      textAlign: TextAlign.center,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -233,8 +249,10 @@ class _AsteroidDetailScreenState extends State<AsteroidDetailScreen> {
                             dividerColor: Colors.transparent,
                             // 4. Bottom line hatane ke liye
                             tabs: const [
-                              Tab(text: "Core Characteristics"),
-                              Tab(text: "Timeline View"),
+                              // Tab(text: "Core Characteristics"),
+                              // Tab(text: "Timeline View"),
+                              Tab(child:FittedBox(child: Text("Core Characteristics",textAlign: TextAlign.center,))),
+                              Tab(child:FittedBox(child: Text("Timeline View",textAlign: TextAlign.center,))),
                             ],
                           ),
                         ),

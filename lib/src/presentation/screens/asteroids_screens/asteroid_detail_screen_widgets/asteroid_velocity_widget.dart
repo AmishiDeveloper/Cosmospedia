@@ -104,9 +104,14 @@ class AsteroidVelocityWidget extends StatelessWidget {
                   size: 25.sp,
                 ),
                 SizedBox(width: 8.w),
-                Text(
-                  'Approach Velocity Over Time',
-                  style: AppTextStyles.headingSmallStyle(context).copyWith(fontSize: 20.sp),
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      'Approach Velocity Over Time',
+                      style: AppTextStyles.headingSmallStyle(context).copyWith(fontSize: 20.sp),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -133,7 +138,7 @@ class AsteroidVelocityWidget extends StatelessWidget {
                           return LineTooltipItem(
                             '${closeApproachDates[index]}\n${velocities[index]
                                 .toStringAsFixed(2)} km/s',
-                            const TextStyle(color: Colors.white,
+                             AppTextStyles.descriptionSmallTextStyle(context).copyWith(
                                 fontWeight: FontWeight.bold),
                           );
                         }).toList();
@@ -191,7 +196,7 @@ class AsteroidVelocityWidget extends StatelessWidget {
                         ),
                         sideTitles: SideTitles(
                         showTitles: true,
-                        reservedSize: 45.sp,
+                        reservedSize: 25.sp,
                         // Interval ko dynamic banaya taaki y-axis labels sahi dikhein
                         interval: intervalY,//(chartMaxY / 5).floorToDouble().clamp(1, 100),
                         getTitlesWidget: (value, meta) {
@@ -266,8 +271,8 @@ class AsteroidVelocityWidget extends StatelessWidget {
               ),
                 child:Text(
                   'Max Recorded Velocity: ${maxVel.toStringAsFixed(2)} km/s',
-                  style: const TextStyle(
-                      color: Colors.lightBlueAccent, fontWeight: FontWeight.bold),
+                  style: AppTextStyles.descriptionSmallTextStyle(context).copyWith(
+                      color: AppColors.blueShade400, fontWeight: FontWeight.bold),
                 ),
               ),
             ),

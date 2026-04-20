@@ -29,8 +29,11 @@ Widget asteroidVelocityLoadingWidget() {
           Row(
             children: [
               Bone.circle(size: 40.w),
-              Spacer(),
-              Bone.text(words: 4),
+              SizedBox(width: 10.w,),
+              Expanded(
+                  child:
+                  Align(alignment:Alignment.centerLeft,child: Bone.text(words: 3)),
+              ),
             ],
           ),
 

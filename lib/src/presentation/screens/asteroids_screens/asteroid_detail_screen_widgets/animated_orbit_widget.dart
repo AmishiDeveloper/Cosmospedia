@@ -50,7 +50,7 @@ class _AnimatedOrbitWidgetState extends State<AnimatedOrbitWidget>
           children: [
             Container(
               width: constraints.maxWidth,
-              height: 589.h,
+              height: 550.h,
               padding: EdgeInsets.all(16.h),
               //drawerHeaderGradient.withOpacity(0.4),
               //splashBlueBackground, drawerHeader
@@ -144,7 +144,6 @@ class _AnimatedOrbitWidgetState extends State<AnimatedOrbitWidget>
                         ),
                         SizedBox(width: 12.w),
                         Flexible(
-                          // Added Flexible here
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -152,19 +151,23 @@ class _AnimatedOrbitWidgetState extends State<AnimatedOrbitWidget>
                                 widget.isHazardous
                                     ? 'Potentially Hazardous Asteroid'
                                     : 'Non-Hazardous Asteroid',
-                                style: AppTextStyles.headingSmallStyle(
+                                style: AppTextStyles.descriptionSmallTextStyle(
                                  context).copyWith(
                                   fontWeight: FontWeight.bold,
-                                    fontSize:widget.isHazardous? 17.sp:18.sp
+                                    fontSize:widget.isHazardous? 14.sp:15.sp
                                 ),
                               ),
-                              SizedBox(height: 4.h),
+                              SizedBox(height: 8.h),
                               Text(
                                 widget.isHazardous
-                                    ? 'This asteroid\'s orbit intersects Earth\'s orbit path and it is large enough to cause significant damage if impact occurs.'
+                                    ? 'This Asteroid crosses Earth\'s orbit and could cause serious damage on impact.'
                                     : 'This asteroid\'s orbit does not currently pose a threat to Earth.',
-                                style: AppTextStyles.descriptionSmallTextStyle(context).copyWith(color: AppColors.greyShimmerShade100),
-                                textAlign: TextAlign.justify,
+                                style: AppTextStyles.descriptionSmallTextStyle(context).copyWith(
+                                    color: AppColors.greyShimmerShade300,
+                                    fontSize:widget.isHazardous? 10.5.sp:11.sp,
+                                ),
+                                softWrap: true,
+                                maxLines: 2,
                               ),
                             ],
                           ),

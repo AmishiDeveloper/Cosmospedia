@@ -4,6 +4,7 @@ import 'package:cosmospedia/src/core/const/regular_expressions/regex.dart';
 import 'package:cosmospedia/src/core/routes/app_route.dart';
 import 'package:cosmospedia/src/logic/cubits/auth/sign_in_cubit/sign_in_cubit.dart';
 import 'package:cosmospedia/src/logic/cubits/auth/sign_up_cubit/sign_up_cubit.dart';
+import 'package:cosmospedia/src/logic/cubits/bottom_nav_bar/navigation_bar_cubit.dart';
 import 'package:cosmospedia/src/presentation/screens/auth/sign_in_screen/sign_in_screen.dart';
 import 'package:cosmospedia/src/presentation/screens/bottom_nav_bar_screen/navigation_bar_screen.dart';
 import 'package:cosmospedia/src/presentation/widgets/custom_background_widget.dart';
@@ -36,6 +37,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   late FocusNode _emailFocusNode;
   late FocusNode _passwordFocusNode;
   late FocusNode _confirmPasswordFocusNode;
+
+  final ValueNotifier<bool> isPasswordVisible = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> isConfirmPasswordVisible = ValueNotifier<bool>(false);
 
   @override
   void initState() {
@@ -86,12 +90,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
               message: 'Sign Up Successful!',
               success: true,
             );
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  AppRoute.slide(
-                    const NavigationBarScreen(),
-                  ),
-                    (Route<dynamic> route) =>false,
+            Navigator.pushAndRemoveUntil(
+              context,
+              AppRoute.slide(
+                BlocProvider(
+                  create: (context) => NavigationBarCubit(),
+                  child: const NavigationBarScreen(),
+                ),
+              ),
+                  (Route<dynamic> route) => false,
             );
           }
         },
@@ -142,11 +149,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Username is required';
+                              return 'Name is required';
                             }
                             if (!RegularExpressions.usernameRegex.hasMatch(
                               value)) {
-                              return 'username must be 6-20 character long with no special character.';
+                              return 'Name must be 6-20 character long with no special character except space.';
                             }
                             return null;
                           },
@@ -187,102 +194,117 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                         SizedBox(height: 10.h),
 
-                        CustomTextField(
-                          controller: _passwordController,
-                          focusNode: _passwordFocusNode,
-                          onFieldSubmitted: (v) => FocusScope.of(
-                            context,
-                          ).requestFocus(_confirmPasswordFocusNode),
-                          hintText: 'Password',
-                          labelText: 'Password',
-                          prefix: Icon(
-                            Icons.lock,
-                            size: 20.r,
-                            color: AppColors.textPrimaryDark,
-                          ),
-                          suffix: IconButton(
-                            onPressed: () {
-                              cubit.togglePassword(cubit.isPasswordVisible);
-                            },
-                            icon: Icon(
-                              cubit.isPasswordVisible
-                                  ? Icons.visibility_sharp
-                                  : Icons.visibility_off_sharp,
-                              size: 20.r,
-                              color: AppColors.textPrimaryDark,
-                            ),
-                          ),
-                          obscureText: !cubit.isPasswordVisible,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.deny(RegExp(r'\s')),
-                          ],
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Password is required';
-                            }
-                            if (!RegularExpressions.passwordRegex.hasMatch(
-                              value,
-                            )) {
-                              return 'Enter valid password (8-15 characters).';
-                            }
-                            return null;
-                          },
+                        ValueListenableBuilder(
+                          valueListenable: isPasswordVisible,
+                          builder: (context, bool visible, child) {
+                            return CustomTextField(
+                              controller: _passwordController,
+                              focusNode: _passwordFocusNode,
+                              onFieldSubmitted: (v) => FocusScope.of(context).requestFocus(_confirmPasswordFocusNode),
+                              hintText: 'Password',
+                              labelText: 'Password',
+                              prefix: Icon(
+                                Icons.lock,
+                                size: 20.r,
+                                color: AppColors.textPrimaryDark,
+                              ),
+                              suffix: IconButton(
+                                onPressed: () {
+                                  isPasswordVisible.value = !isPasswordVisible.value;
+                                },
+                                icon: Icon(
+                                  visible
+                                      ? Icons.visibility_sharp
+                                      : Icons.visibility_off_sharp,
+                                  size: 20.r,
+                                  color: AppColors.textPrimaryDark,
+                                ),
+                              ),
+                              obscureText: !visible,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                              ],
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Password is required';
+                                }
+                                if (!RegularExpressions.passwordRegex.hasMatch(
+                                  value,
+                                )) {
+                                  return 'Min. 8-15 non-space chars, 1 uppercase, 1 lowercase, 1 digit & 1 special char.';
+                                }
+                                return null;
+                              },
+                            );
+                          }
                         ),
 
                         SizedBox(height: 10.h),
 
-                        CustomTextField(
-                          controller: _confirmPasswordController,
-                          focusNode: _confirmPasswordFocusNode,
-                          onFieldSubmitted: (v) {
-                          _confirmPasswordFocusNode.unfocus();
-                          },
-                          textInputAction: TextInputAction.done,
-                          hintText: 'Confirm Password',
-                          labelText: 'Confirm Password',
-                          prefix: Icon(
-                            Icons.lock,
-                            size: 20.r,
-                            color: AppColors.textPrimaryDark,
-                          ),
-                          suffix: IconButton(
-                            onPressed: () {
-                              cubit.toggleConfirmPassword(
-                                cubit.isConfirmPasswordVisible,
-                              );
-                            },
-                            icon: Icon(
-                              cubit.isConfirmPasswordVisible
-                                  ? Icons.visibility_sharp
-                                  : Icons.visibility_off_sharp,
-                              color: AppColors.textPrimaryDark,
-                              size: 20.r,
-                            ),
-                          ),
-                          obscureText: !cubit.isConfirmPasswordVisible,
-                          inputFormatters: [
-                            FilteringTextInputFormatter.deny(RegExp(r'\s')),
-                          ],
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Confirm Password is required';
-                            }
-                            if (value.isNotEmpty &&
-                                value == _passwordController.text) {
-                              return 'Enter confirm password that matches password.';
-                            }
-                            return null;
-                          },
+                        ValueListenableBuilder(
+                          valueListenable: isConfirmPasswordVisible,
+                          builder: (context, bool visible, child) {
+                            return CustomTextField(
+                              controller: _confirmPasswordController,
+                              focusNode: _confirmPasswordFocusNode,
+                              onFieldSubmitted: (v) {
+                              _confirmPasswordFocusNode.unfocus();
+                              },
+                              textInputAction: TextInputAction.done,
+                              hintText: 'Confirm Password',
+                              labelText: 'Confirm Password',
+                              prefix: Icon(
+                                Icons.lock,
+                                size: 20.r,
+                                color: AppColors.textPrimaryDark,
+                              ),
+                              suffix: IconButton(
+                                onPressed: () {
+                                  isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
+                                },
+                                icon: Icon(
+                                  visible
+                                      ? Icons.visibility_sharp
+                                      : Icons.visibility_off_sharp,
+                                  color: AppColors.textPrimaryDark,
+                                  size: 20.r,
+                                ),
+                              ),
+                              obscureText: !visible,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                              ],
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Confirm Password is required';
+                                }
+                                if (value.isNotEmpty &&
+                                    value != _passwordController.text) {
+                                  return 'Enter confirm password that matches password.';
+                                }
+                                return null;
+                              },
+                            );
+                          }
                         ),
 
                         SizedBox(height: 30.h),
 
                         CustomElevatedButton(
                           isLoading: state is SignUpLoadingState,
+                          loadingText: 'Signing up...',
                           text: 'Sign up',
                           width: double.infinity,
                           onPressed: () {
-                            if (_formKey.currentState!.validate()) {}
+                            FocusScope.of(context).unfocus();
+
+                            if (_formKey.currentState!.validate()) {
+                              context.read<SignUpCubit>().signUpUser(
+                                name: _nameController.text.trim(),
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text.trim(),
+                              );
+                            }
                           },
                         ),
 

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cosmospedia/src/data/network/data_source/nasa/apod_api_service/apod_api_service.dart';
 import 'package:cosmospedia/src/data/network/data_source/nasa/asteroid_api_service/asteroid_api_service.dart';
 import 'package:cosmospedia/src/data/network/data_source/nasa/cme_api_service/cme_api_service.dart';
@@ -5,11 +6,13 @@ import 'package:cosmospedia/src/data/network/data_source/space_dev/space_news/la
 import 'package:cosmospedia/src/data/network/data_source/space_dev/space_news/space_flight_news_api_service/space_flight_news_api_service.dart';
 import 'package:cosmospedia/src/data/network/dio_client.dart';
 import 'package:cosmospedia/src/data/network/dio_factory.dart';
+import 'package:cosmospedia/src/data/repository/auth_repo/auth_repository.dart';
 import 'package:cosmospedia/src/data/repository/nasa_repo/apod_repository/apod_repository.dart';
 import 'package:cosmospedia/src/data/repository/nasa_repo/asteroid_repository/asteroid_repository.dart';
 import 'package:cosmospedia/src/data/repository/nasa_repo/cme_repository/cme_repository.dart';
 import 'package:cosmospedia/src/data/repository/space_dev_repo/space_news_repo/space_news_repository.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 
 /*
@@ -123,6 +126,12 @@ class ServiceLocator {
 
     ///Api Services
 
+    // Firebase Auth instance
+    getIt.registerSingleton<FirebaseAuth>(FirebaseAuth.instance);
+
+    // Firestore instance
+    getIt.registerSingleton<FirebaseFirestore>(FirebaseFirestore.instance);
+
     //apod
     getIt.registerSingleton(ApodApiService(getIt<DioClient>(instanceName: 'nasaClient')));
 
@@ -140,6 +149,15 @@ class ServiceLocator {
 
 
     /// Repository
+
+    // Authentication Repository
+    getIt.registerSingleton<AuthRepository>(
+      AuthRepository(
+        auth: getIt<FirebaseAuth>(),
+        firestore: getIt<FirebaseFirestore>(),
+      ),
+    );
+
 
     //apod
     getIt.registerSingleton(

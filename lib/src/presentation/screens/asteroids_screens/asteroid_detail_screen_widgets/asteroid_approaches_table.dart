@@ -59,14 +59,17 @@ class AsteroidApproachesTable extends StatelessWidget {
 
               SizedBox(width: 8.w),
 
-              Text(
-                'Close Approaches to Earth',
-                style: AppTextStyles.headingSmallStyle(
-                  context,
-                ).copyWith(fontSize: 18.sp),
+              Expanded(
+                child: Text(
+                  'Close Approaches to Earth',
+                  style: AppTextStyles.headingSmallStyle(
+                    context,
+                  ).copyWith(fontSize: 18.sp),
+                  textAlign: TextAlign.center,
+                ),
               ),
 
-              const Spacer(),
+             // const Spacer(),
 
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
@@ -91,7 +94,7 @@ class AsteroidApproachesTable extends StatelessWidget {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width- 32),//minWidth: 500.w - 64.w),
+                constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),//minWidth: 500.w - 64.w),
                 child: DataTable(
                   columnSpacing: 24.w,
                   //HEADER ROW COLOR
@@ -152,22 +155,24 @@ class AsteroidApproachesTable extends StatelessWidget {
 
                                 SizedBox(width: 5.w,),
 
-                                Text(
-                                  double.parse(
-                                    approach.value.relativeVelocity?.kilometersPerSecond ??
-                                        '0',
-                                  ).toStringAsFixed(2),
-                                  style:
-                                      AppTextStyles.descriptionSmallTextStyle(
-                                        context,
-                                      ).copyWith(
-                                        color: isPast
-                                            ? AppColors.surfaceLight
-                                            : AppColors.greyShimmerShade400,
-                                        fontWeight: isPast
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                      ),
+                                Flexible(
+                                  child: Text(
+                                    double.parse(
+                                      approach.value.relativeVelocity?.kilometersPerSecond ??
+                                          '0',
+                                    ).toStringAsFixed(2),
+                                    style:
+                                        AppTextStyles.descriptionSmallTextStyle(
+                                          context,
+                                        ).copyWith(
+                                          color: isPast
+                                              ? AppColors.surfaceLight
+                                              : AppColors.greyShimmerShade400,
+                                          fontWeight: isPast
+                                              ? FontWeight.bold
+                                              : FontWeight.normal,
+                                        ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -268,18 +273,17 @@ class AsteroidApproachesTable extends StatelessWidget {
 
   DataColumn _buildDataColumn(BuildContext context,IconData icon, String label,{bool isCenter=false}) {
     return DataColumn(
-      label: Expanded(
-        child: Row(
-          mainAxisAlignment: isCenter ? MainAxisAlignment.center : MainAxisAlignment.start,
-          children: [
-            Icon(icon, size: 16.sp, color: AppColors.surfaceLight),
-            SizedBox(width: 4.w),
-            Text(
-              label,
-              style: AppTextStyles.headingSmallStyle(context).copyWith(fontSize: 14.sp),
-              ),
-          ],
-        ),
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: isCenter ? MainAxisAlignment.center : MainAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16.sp, color: AppColors.surfaceLight),
+          SizedBox(width: 4.w),
+          Text(
+            label,
+            style: AppTextStyles.headingSmallStyle(context).copyWith(fontSize: 14.sp),
+            ),
+        ],
       ),
     );
   }

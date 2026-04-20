@@ -31,6 +31,7 @@ class CustomTextField extends StatelessWidget {
   final InputBorder? enabledBorder;
   final int? maxLines;
   final int? maxLength;
+  final int? errorMaxLines;
   final List<TextInputFormatter>? inputFormatters;
   final TextAlign textAlign;
   final double? horizontalContentPadding;
@@ -66,6 +67,7 @@ class CustomTextField extends StatelessWidget {
     this.enabledBorder,
     this.isEnabledBorder = false,
     this.maxLines = 1,
+    this.errorMaxLines = 2,
     this.maxLength,
     this.inputFormatters,
     this.textAlign = TextAlign.start,
@@ -108,6 +110,7 @@ class CustomTextField extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: keyBoardType,
       decoration: InputDecoration(
+        errorMaxLines: errorMaxLines,
         counter: counterWidget,
         hintStyle: hintStyle ?? AppTextStyles.descriptionMediumTextStyle(context).copyWith(fontWeight: FontWeight.w400,color: AppColors.textPrimaryDark,),
         labelStyle: labelStyle ??AppTextStyles.descriptionMediumTextStyle(context).copyWith(fontWeight: FontWeight.w400,color: AppColors.textPrimaryDark,),
