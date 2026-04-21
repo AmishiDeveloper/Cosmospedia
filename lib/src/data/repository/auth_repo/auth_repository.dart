@@ -22,12 +22,24 @@ class AuthRepository {
       );
 
       final String actualUid = credential.user!.uid;
-      final userData = user.toMap();
+      final userData = user.toMap(); // convert model data to map
       userData['uid'] = actualUid; // Empty string ko asli UID se overwrite kar diya
 
-      // 2. Firestore mein user details save karo
-      // Hum wahi UID use karenge jo Auth ne generate ki hai
-      await _firestore.collection('users').doc(actualUid).set(userData);
+
+      //await _firestore.collection('users').doc(actualUid).set(userData); // earlier only this line now this line with try catch
+
+      // yeh try catch uske liye ki agr user create ho gaya lekin firestore m uski details store karte vakt internet chala gaya ya kuch aur error aayi tab auth m toh user create ho gaya lekin firestore m nahi hua toh jab user phir se usi cred ke saath sign up karega toh error aayegi leki uss uid se jab data firestore se fetch karega toh khali aayega.
+      try {
+        // User creation logic...
+        // 2. Firestore mein user details save karo manually mtlb jab user create ho jaye tab user ki uss id ko use karke user ka jo bhi data tumhe firestore(db) m store karna h voh karo . toh uske liye firestore m ek collection banao tum users ke naam se phir uss collection m uss user ki uid ke naam se ek doc bano and end m jo bhi data uss document m daalna h voh daal(set kar) do.
+        // Hum wahi UID use karenge jo Auth ne generate ki hai
+        await _firestore.collection('users').doc(actualUid).set(userData);// users collection developer create kar raha h phir user ki UID ke naam se ek folder (Document) bana raha h aur ye sara data usme bhar de raha h."
+      } catch (e) {
+        // AGAR Firestore fail hua, toh Auth wala user delete kar do
+        await _auth.currentUser?.delete();
+        throw e.toString();
+      }
+
     } on FirebaseAuthException catch (e) {
       throw e.message ?? "An unknown error occurred";
     }

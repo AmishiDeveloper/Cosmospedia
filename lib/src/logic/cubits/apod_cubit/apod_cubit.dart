@@ -276,7 +276,7 @@ class ApodCubit extends Cubit<ApodState> {
 
     await todayApodResponse.fold(
           (error) async {
-        // 🎯 FIX 1: Sirf tabhi "Unstable" bolo jab sach mein Socket/Timeout ho
+        //  FIX 1: Sirf tabhi "Unstable" bolo jab sach mein Socket/Timeout ho
         bool isNetworkError = error.message.toLowerCase().contains("socket") ||
             error.message.toLowerCase().contains("host lookup") ||
             error.message.toLowerCase().contains("timeout");
@@ -293,7 +293,7 @@ class ApodCubit extends Cubit<ApodState> {
           return;
         }
 
-        // 🎯 FIX 2: Retry sirf tab jab na cache ho na fallback
+        //  FIX 2: Retry sirf tab jab na cache ho na fallback
         if ((isServerError || error.message.contains("timeout")) && retryCount < 1) {
           retryCount++;
           await Future.delayed(const Duration(seconds: 2));
@@ -330,7 +330,7 @@ class ApodCubit extends Cubit<ApodState> {
     );
   }
 
-//  FIX 3: _emitSuccess mein "Silent Reset" ensure karein
+  //  3: _emitSuccess mein "Silent Reset" ensure karein
   void _emitSuccess(ApodSuccessState successState) {
     // Agar current state already Success hai aur message null hai,
     // toh dubara message mat bhejo jab tak data na badle.

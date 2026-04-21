@@ -30,7 +30,9 @@ class SpaceNewsCubit extends Cubit<SpaceNewsState> {
     // toh Repository ko query parameters ke saath hit karna hoga (Upcoming empty aayega)
     if (category == 'All') {
       result = await _repo.fetchCombinedFeed(
-          limit: 50); // Repository handle karega logic
+          limit: 50,
+        targetDate: date,
+      ); // Repository handle karega logic
     } else {
       switch (category) {
         case 'News':
@@ -54,7 +56,13 @@ class SpaceNewsCubit extends Cubit<SpaceNewsState> {
         // Naya Filter Logic: Agar user ne Calendar se koi specific date select ki hai,
         // toh hum feed ko us date ke hisaab se filter karenge.
         List<SpaceContent> finalFeed = feed;
-        if (!isToday) {
+
+        // Category filter logic:
+        // Agar 'All' hai, toh Repo ne filter kar diya hai.
+        // Lekin agar specific category (News etc) hai, toh humein yahan filter karna hoga.
+
+        if (category != 'All' && !isToday) {
+        //if (!isToday) {
           finalFeed =
               feed
                   .where((item) => _isSameDay(item.publishedAtDate, date))

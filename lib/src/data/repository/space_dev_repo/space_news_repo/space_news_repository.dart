@@ -18,7 +18,7 @@ class SpaceNewsRepository{
 
 
   FutureResult<List<SpaceContent>> fetchCombinedFeed({
-    int limit=50,
+    int limit=150,
     DateTime? targetDate, //Global calendar
   }) async {
     try {
@@ -65,6 +65,7 @@ class SpaceNewsRepository{
       // --- NAYA LOGIC START ---
 
       final now = DateTime.now();
+      final sevenDaysAgo = now.subtract(const Duration(days: 7));
 
       // --- LOGIC A: AGAR AAJ KI DATE HAI (DEFAULT VIEW) ---
       if (targetDate == null || _isSameDay(targetDate, now)) {
@@ -77,12 +78,24 @@ class SpaceNewsRepository{
         final limitedUpcoming = upcoming.take(16).toList();
 
         // 2. Recent Highlights (Past/Today) - 10 per category latest first to past data
-        final pastData = combinedList.where((item) => !item.publishedAtDate.isAfter(now)).toList();
+        //final pastData = combinedList.where((item) => !item.publishedAtDate.isAfter(now)).toList();//old line
 
-        final news = pastData.where((e) => e.typeValue == 'news').take(10).toList();
-        final launches = pastData.where((e) => e.typeValue == 'launches').take(10).toList();
-        final events = pastData.where((e) => e.typeValue == 'events').take(10).toList();
-        final missions = pastData.where((e) => e.typeValue == 'missions').take(10).toList();
+        // 2. pastData ka filter aise update karo:
+        final pastData = combinedList.where((item) {
+          final isPast = !item.publishedAtDate.isAfter(now); // aaj se pehle toh past data eg- 21 -04-26
+          final isWithinWeek = item.publishedAtDate.isAfter(sevenDaysAgo); //aaj se 7 din phele ke aage . eg- after 14-04-26
+          return isPast && isWithinWeek; // past data = after 14 and before or equal to  21
+        }).toList();
+
+        final news = pastData.where((e) => e.typeValue == 'news').toList();
+        final launches = pastData.where((e) => e.typeValue == 'launches').toList();
+        final events = pastData.where((e) => e.typeValue == 'events').toList();
+        final missions = pastData.where((e) => e.typeValue == 'missions').toList();
+
+        // final news = pastData.where((e) => e.typeValue == 'news').take(10).toList();
+        // final launches = pastData.where((e) => e.typeValue == 'launches').take(10).toList();
+        // final events = pastData.where((e) => e.typeValue == 'events').take(10).toList();
+        // final missions = pastData.where((e) => e.typeValue == 'missions').take(10).toList();
 
         List<SpaceContent> recentHighlights = [...news, ...launches, ...events, ...missions];
         // LATEST PAST FIRST: Descending order (Today -> Yesterday -> Last Week)

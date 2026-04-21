@@ -43,15 +43,22 @@ class CmeRepository {
     catch (e) {
       //return left(CustomError("CME Events Data Format Error: ${e.toString()}", 500));
 
-      // 🎯 FALLBACK LOGIC: Agar NASA ka server down hai
+
+      // FALLBACK LOGIC: Agar NASA ka server down hai
       if (_shouldFallback(e)) {
-        print("🎯 Connection refused detected! Switching to Mock Data...");
+        print(" Connection refused detected! Switching to Mock Data...");
         return await _loadCmeMockData();
       }
 
-      // Baaki errors ke liye normal handling
+      // 2. Agar fallback nahi hua, toh asli StatusCode nikalo
+      int statusCode = 500; // Default error code
+      if (e is DioException) {
+        statusCode = e.response?.statusCode ?? 500;
+      }
+
+      // 3. Error message nikal kar Right format mein bhej do
       String errorMessage = _getErrorMessage(e);
-      return left(CustomError(errorMessage, 500));
+      return left(CustomError(errorMessage, statusCode));
 
     }
   }
@@ -86,9 +93,9 @@ class CmeRepository {
     catch (e) {
       //return left(CustomError("CME Analysis Data Format Error: ${e.toString()}", 500));
 
-      // 🎯 FALLBACK LOGIC: Agar NASA ka server down hai
+      //  FALLBACK LOGIC: Agar NASA ka server down hai
       if (_shouldFallback(e)) {
-        print("🎯 Connection refused detected! Switching to Mock Data of Analysis...");
+        print(" Connection refused detected! Switching to Mock Data of Analysis...");
     return await _loadCmeAnalysisMockData();
     }
 
@@ -123,7 +130,7 @@ String _getErrorMessage(Object e) {
 // 📂 Local JSON load karne ka logic (Tab 1 ke liye)
 FutureResult<List<CmeModel>> _loadCmeMockData() async {
   try {
-    print("🚀 Loading CME Mock Data from assets...");
+    print(" Loading CME Mock Data from assets...");
     final String response = await rootBundle.loadString('assets/data/cme_demo_data.json');
     final List<dynamic> data = json.decode(response);
     final List<CmeModel> models = data.map((json) => CmeModel.fromJson(json)).toList();
@@ -136,7 +143,7 @@ FutureResult<List<CmeModel>> _loadCmeMockData() async {
 // 📂 Analysis Mock Data load karne ka logic
 FutureResult<List<CmeAnalysisModel>> _loadCmeAnalysisMockData() async {
   try {
-    print("🚀 Loading CME Analysis Mock Data...");
+    print(" Loading CME Analysis Mock Data...");
     final String response = await rootBundle.loadString('assets/data/cme_analysis_demo_data.json');
     final List<dynamic> data = json.decode(response);
 

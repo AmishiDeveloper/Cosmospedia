@@ -279,6 +279,7 @@ class SpaceNewsScreen extends StatelessWidget {
   // --- UI: Upcoming Slider aur Recent Grouped List ---
   Widget _buildGroupedList(BuildContext context, SpaceNewsSuccessState state) {
     final now = DateTime.now();
+    final sevenDaysAgo = DateTime.now().subtract(const Duration(days: 7));
     final feed = state.combinedFeed;
 
     // 1. Total Future Data (Bina 'take' ke, taaki length check kar sakein) // upcoming slider
@@ -296,8 +297,13 @@ class SpaceNewsScreen extends StatelessWidget {
     }
 
     final recentItems = state.isToday
-        ? feed.where((item) => !item.publishedAtDate.isAfter(now)).toList()
+        ? feed.where((item) => !item.publishedAtDate.isAfter(now) && item.publishedAtDate.isAfter(sevenDaysAgo)
+    ).toList()
         : feed; // Calendar selected hai toh poora data list mein aayega
+
+    // final recentItems = state.isToday
+    //     ? feed.where((item) => !item.publishedAtDate.isAfter(now)).toList()
+    //     : feed; // Calendar selected hai toh poora data list mein aayega
 
     return ListView(
       physics: const BouncingScrollPhysics(),
@@ -434,10 +440,106 @@ class SpaceNewsScreen extends StatelessWidget {
 
   // --- RECENT LIST WITH DATE-WISE VIEW MORE ---
   // Recent items ko group karne wala function
-  List<Widget> _buildRecentVerticalList(
-    BuildContext context,
-    List<SpaceContent> recentItems,
-  ) {
+  // List<Widget> _buildRecentVerticalList(
+  //   BuildContext context,
+  //   List<SpaceContent> recentItems,
+  // ) {
+  //   final groupedData = <String, List<SpaceContent>>{};
+  //   for (var item in recentItems) {
+  //     final dateKey = item.formattedDate;
+  //     groupedData.putIfAbsent(dateKey, () => []).add(item);
+  //   }
+  //
+  //   final List<Widget> listWidgets = [];
+  //   groupedData.forEach((date, items) {
+  //     // Date Header
+  //     listWidgets.add(
+  //       Padding(
+  //         padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 16.h),
+  //         child: Row(
+  //           children: [
+  //             Expanded(
+  //               child: Divider(
+  //                 height: 2.h,
+  //                 color: AppColors.greyShimmerShade400,
+  //               ),
+  //             ),
+  //
+  //             SizedBox(width: 10.w),
+  //             // Expanded(
+  //             //   child:
+  //             Center(
+  //               child: Text(
+  //                 date,
+  //                 style: AppTextStyles.headingSmallStyle(
+  //                   context,
+  //                 ).copyWith(color: AppColors.greyShimmer),
+  //               ),
+  //             ),
+  //
+  //             // ),
+  //             SizedBox(width: 10.w),
+  //
+  //             Expanded(
+  //               child: Divider(
+  //                 height: 2.h,
+  //                 color: AppColors.greyShimmerShade400,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     );
+  //
+  //     // LOGIC: Sirf pehle 10 items dikhao
+  //     final displayItems = items.take(10).toList();
+  //
+  //     // Cards for that date
+  //     for (var item in displayItems) {  //items
+  //       listWidgets.add(SpaceContentCard(content: item));
+  //     }
+  //
+  //
+  //       // LOGIC: Agar us date mein 10 se zyada data hai, toh "View More" button
+  //       if (items.length >= 10) {
+  //     listWidgets.add(
+  //       Padding(
+  //         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 5.h),
+  //         child: Align(
+  //           alignment: Alignment.centerRight,
+  //           child: TextButton.icon(
+  //             onPressed: () {
+  //               Navigator.push(context, AppRoute.slide(
+  //                 SpaceDiscoveriesListScreen(
+  //                   title: "Discoveries: $date",
+  //                   items: items, // Poora data list screen pe bhej rahe hain
+  //                 ),
+  //               ),
+  //               );
+  //             },
+  //             icon: const Icon(Icons.arrow_forward_rounded, size: 16,color: AppColors.surfaceLight,),
+  //             label: Text("View all $date", style:AppTextStyles.descriptionSmallTextStyle(context).copyWith(
+  //               //color: AppColors.info,
+  //               fontWeight: FontWeight.bold,
+  //             ),
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     );
+  //   }
+  // }
+  // );
+  //   return listWidgets;
+  // }
+
+
+
+
+
+
+  List<Widget> _buildRecentVerticalList(BuildContext context, List<SpaceContent> recentItems) {
+    // 1. Dates mein group karo (Jo aapne pehle hi kiya hua hai)
     final groupedData = <String, List<SpaceContent>>{};
     for (var item in recentItems) {
       final dateKey = item.formattedDate;
@@ -445,8 +547,24 @@ class SpaceNewsScreen extends StatelessWidget {
     }
 
     final List<Widget> listWidgets = [];
-    groupedData.forEach((date, items) {
-      // Date Header
+
+    groupedData.forEach((date, allItemsForDate) {
+      // ---  CATEGORY BALANCING LOGIC (Har cat se 5) ---
+      List<SpaceContent> balancedList = [];
+      final categories = ['news', 'launches', 'events', 'missions'];
+
+      for (var cat in categories) {
+        final catData = allItemsForDate.where((e) => e.typeValue == cat).take(5).toList();
+        balancedList.addAll(catData);
+      }
+      // Sort balanced list taaki mix achha dikhe
+      balancedList.sort((a, b) => b.publishedAtDate.compareTo(a.publishedAtDate));
+
+      // ---  UI LIMIT LOGIC (Bahar 10) ---
+      final displayItems = balancedList.take(10).toList();
+      bool showViewMore = allItemsForDate.length > 10; //  10 se zyada items hain toh View More
+
+      // --- Date Header add karo (Aapka purana code) ---
       listWidgets.add(
         Padding(
           padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 16.h),
@@ -483,49 +601,38 @@ class SpaceNewsScreen extends StatelessWidget {
             ],
           ),
         ),
-      );
+      );//_buildDateHeader(date));
 
-      // LOGIC: Sirf pehle 10 items dikhao
-      final displayItems = items.take(10).toList();
-
-      // Cards for that date
-      for (var item in displayItems) {  //items
+      // --- Cards add karo ---
+      for (var item in displayItems) {
         listWidgets.add(SpaceContentCard(content: item));
       }
 
-
-        // LOGIC: Agar us date mein 10 se zyada data hai, toh "View More" button
-        if (items.length >= 10) {
-      listWidgets.add(
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 5.h),
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
+      // --- View More Button ---
+      if (showViewMore) {
+        listWidgets.add(
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: TextButton(
               onPressed: () {
                 Navigator.push(context, AppRoute.slide(
                   SpaceDiscoveriesListScreen(
                     title: "Discoveries: $date",
-                    items: items, // Poora data list screen pe bhej rahe hain
+                    items: allItemsForDate, // Yahan poora mixed data (20+) jayega
                   ),
-                ),
-                );
+                ));
               },
-              icon: const Icon(Icons.arrow_forward_rounded, size: 16,color: AppColors.surfaceLight,),
-              label: Text("View all $date", style:AppTextStyles.descriptionSmallTextStyle(context).copyWith(
-                //color: AppColors.info,
-                fontWeight: FontWeight.bold,
-              ),
-              ),
+              child: Align(alignment:Alignment.centerRight,child: Text("View all for $date",style: AppTextStyles.descriptionSmallTextStyle(context).copyWith(color: AppColors.greyShimmerShade300),)),
             ),
           ),
-        ),
-      );
-    }
-  }
-  );
+        );
+      }
+    });
     return listWidgets;
   }
+
+
+
 
   Widget _buildDateContainer(
     BuildContext context,
