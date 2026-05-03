@@ -24,6 +24,3 @@ final class UserAccountError extends UserAccountState {
   final String errorMessage;
   UserAccountError({required this.errorMessage});
 }
-
-// final class UserAccountTogglePasswordState extends UserAccountState {}
-// final class UserAccountToggleConfirmPasswordState extends UserAccountState {}

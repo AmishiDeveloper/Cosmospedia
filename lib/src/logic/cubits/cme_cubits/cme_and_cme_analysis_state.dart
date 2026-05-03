@@ -24,7 +24,7 @@ final class CmeAndCmeAnalysisSuccessState extends CmeAndCmeAnalysisState {
   final int? cmeExpansionTileExpandedIndex; // New Variable: null matlab koi card open nahi h
   final double impactProbability;
 
-  // 🎯 New Variables for Demo Mode
+  //New Variables for Demo Mode
   final bool isDemoMode;
   final DateTime calendarFirstDate;
   final DateTime calendarLastDate;

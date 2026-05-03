@@ -15,19 +15,6 @@ final class SpaceNewsErrorState extends SpaceNewsState {
   SpaceNewsErrorState({required this.errorMessage});
 }
 
-// old logic
-// final class SpaceNewsSuccessState extends SpaceNewsState {
-//   final DateTime activeDate;
-//   final List<SpaceContent> combinedFeed;
-//   final String activeCategory; // 'All', 'News', 'Missions', 'Events', 'Launches'
-//
-//   SpaceNewsSuccessState({
-//     required this.activeDate,
-//     required this.combinedFeed,
-//     this.activeCategory = 'All',
-//   });
-// }
-
 final class SpaceNewsSuccessState extends SpaceNewsState {
   final DateTime activeDate;
   final List<SpaceContent> combinedFeed;

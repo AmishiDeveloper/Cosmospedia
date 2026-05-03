@@ -50,40 +50,6 @@ class AsteroidVelocityWidget extends StatelessWidget {
     // Isse graph hamesha (interval * multiples) par khatam hoga
     double chartMaxY = ((maxVel / intervalY).ceil() + 1) * intervalY;
 
-    //double chartMaxY = maxVel + (maxVel * 0.2); // 20% buffer upar se//0.2
-
-    // return Card(
-    //   elevation: 8,
-    //   color: Colors.blueGrey.withOpacity(0.2),
-    //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    //   child: Padding(
-    //     padding: const EdgeInsets.all(16),
-    //     child: Column(
-    //       crossAxisAlignment: CrossAxisAlignment.start,
-    //       children: [
-    //         Row(
-    //           children: [
-    //             const Icon(Icons.speed, color: Colors.white),
-    //             const SizedBox(width: 8),
-    //             Text(
-    //               'Approach Velocity Over Time',
-    //               style: Theme
-    //                   .of(context)
-    //                   .textTheme
-    //                   .titleLarge
-    //                   ?.copyWith(
-    //                 color: Colors.white,
-    //                 fontWeight: FontWeight.bold,
-    //               ),
-    //             ),
-    //           ],
-    //         ),
-    //         const Divider(color: Colors.white30),
-    //         const SizedBox(height: 16),
-
-
-
-
       return Container(
         padding: EdgeInsets.all(16.h),
         decoration: BoxDecoration(

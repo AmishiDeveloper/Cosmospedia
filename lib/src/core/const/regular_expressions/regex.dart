@@ -20,8 +20,4 @@ class RegularExpressions {
   //input formatter to allow only aphanumeric char and not special chars
   static final RegExp usernameInput = RegExp(r'[a-zA-Z0-9 ]');
 
-
-  //static final RegExp inputFormatterDateRegex = RegExp(r'[0-9]');
-  //static final RegExp inputFormatterMonthRegex = RegExp(r'[a-zA-Z]');
-
 }

@@ -70,10 +70,4 @@ class AsteroidRepository {
       return left(CustomError("Data Format Error: ${e.toString()}", 500));
     }
   }
-
-
-
-
-
-
 }

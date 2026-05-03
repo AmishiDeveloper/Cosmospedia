@@ -11,10 +11,6 @@ Widget customBackgroundWidget({required Widget child}) {
               AppImages.background,
           ),
         fit: BoxFit.cover,
-        // colorFilter: ColorFilter.mode(
-        //     Colors.black.withOpacity(0.7),
-        //     BlendMode.darken,
-        // ),
       ),
     ),
     child: child,

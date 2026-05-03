@@ -3,27 +3,12 @@ import 'package:cosmospedia/src/core/service_locator.dart';
 import 'package:cosmospedia/src/data/model/user_model/user_model.dart';
 import 'package:cosmospedia/src/data/repository/auth_repo/auth_repository.dart';
 import 'package:meta/meta.dart';
-
 part 'user_account_state.dart';
 
 class UserAccountCubit extends Cubit<UserAccountState> {
   UserAccountCubit() : super(UserAccountInitial());
 
   final _repo = getIt<AuthRepository>();
-
-  // bool isNewPasswordVisible= false;
-  //
-  // void toggleNewPassword(bool newPasswordVisible){
-  //   isNewPasswordVisible= !newPasswordVisible;
-  //   emit(UserAccountTogglePasswordState());
-  // }
-  //
-  // bool isConfirmNewPasswordVisible= false;
-  //
-  // void toggleConfirmNewPassword(bool confirmNewPasswordVisible){
-  //   isConfirmNewPasswordVisible= !confirmNewPasswordVisible;
-  //   emit(UserAccountToggleConfirmPasswordState());
-  // }
 
 // Screen khulte hi data fetch karo
   Future<void> fetchUserData() async {

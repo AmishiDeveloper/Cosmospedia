@@ -4,7 +4,6 @@ import 'package:cosmospedia/src/data/model/space_news_models/space_news_common_m
 import 'package:cosmospedia/src/data/repository/space_dev_repo/space_news_repo/space_news_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
-
 part 'space_news_state.dart';
 
 /// new logic
@@ -68,7 +67,6 @@ class SpaceNewsCubit extends Cubit<SpaceNewsState> {
                   .where((item) => _isSameDay(item.publishedAtDate, date))
                   .toList();
         }
-
         emit(
           SpaceNewsSuccessState(
             combinedFeed: finalFeed,
@@ -135,116 +133,4 @@ class SpaceNewsCubit extends Cubit<SpaceNewsState> {
     }
   }
 }
-
-/// old logic
-// class SpaceNewsCubit extends Cubit<SpaceNewsState> {
-//   SpaceNewsCubit() : super(SpaceNewsInitial()){
-//     getCombinedFeed();
-//   }
-//
-//   final _repo = getIt<SpaceNewsRepository>();
-//
-//   // 1. Unified Feed (Default: All Chip)
-//   // Yeh function repository ke combined feed ko call karta hai
-//   // jisme news, events aur launches sab merged aur sorted hote hain.
-//   Future<void> getCombinedFeed({int limit = 10}) async {
-//     emit(SpaceNewsLoadingState());
-//
-//     final result = await _repo.fetchCombinedFeed(limit: limit);
-//
-//     result.fold(
-//           (error) => emit(SpaceNewsErrorState(errorMessage: error.message)),
-//           (feed) => emit(SpaceNewsSuccessState(
-//         combinedFeed: feed,
-//         activeCategory: 'All',
-//             activeDate: DateTime.now(),
-//       ),
-//           ),
-//     );
-//   }
-//
-//   // 2. Specific Categories (News, Missions, Events, Launches)
-//   // Jab user specific chip par click karega (e.g., News only)
-//   // toh hum repository ke private functions (jo ab public ya specific wrapper honi chahiye)
-//   // ko call kar sakte hain.
-//   Future<void> getSpecificCategory(String category) async {
-//     if (category == 'All') {
-//       getCombinedFeed();
-//       return;
-//     }
-//
-//     emit(SpaceNewsLoadingState());
-//
-//     // Yahan hum decide karenge ki kaunsa repository method call karna hai
-//     // Note: Aapko Repository mein in functions ko public karna hoga ya wrapper banana hoga
-//     // Abhi ke liye main repository logic ke according example de raha hoon.
-//
-//     dynamic result;
-//
-//     switch (category) {
-//       case 'News':
-//         result = await _repo.fetchNewsArticles(limit: 10);
-//         break;
-//       case 'Missions':
-//         result = await _repo.fetchEvents(limit: 10);
-//         break;
-//       case 'Events':
-//         result = await _repo.fetchEvents(limit: 10);
-//         break;
-//       case 'Launches':
-//         result = await _repo.fetchLaunches(limit: 10);
-//         break;
-//       default:
-//         getCombinedFeed();
-//         return;
-//     }
-//
-//     result.fold(
-//           (error) => emit(SpaceNewsErrorState(errorMessage: error.message)),
-//           (feed) => emit(SpaceNewsSuccessState(
-//         combinedFeed: feed,
-//         activeCategory: category,
-//             activeDate: DateTime.now(),
-//       ),
-//           ),
-//     );
-//   }
-//
-//   // 3. Retry Logic
-//   // Agar error aaye toh user refresh kar sake
-//   void refreshFeed() {
-//     if (state is SpaceNewsSuccessState) {
-//       getSpecificCategory((state as SpaceNewsSuccessState).activeCategory);
-//     } else {
-//       getCombinedFeed();
-//     }
-//   }
-//
-//   // 2. Calendar Selection Logic
-//   Future<void> pickDate(BuildContext context) async {
-//     final DateTime now = DateTime.now();
-//
-//     // Default initial date: Aaj ki date
-//     DateTime initialCalendarDate = now;
-//
-//     // Agar user pehle hi koi date select kar chuka hai (Success state mein hai),
-//     // toh wahi date calendar mein initial dikhao.
-//     if (state is SpaceNewsSuccessState) {
-//       initialCalendarDate = (state as SpaceNewsSuccessState).activeDate;
-//     }
-//
-//     final DateTime? picked = await showDatePicker(
-//       context: context,
-//       initialDate: initialCalendarDate, // Ab ye dynamic hai
-//       firstDate: DateTime(1995, 6, 16),
-//       lastDate: now,
-//     );
-//
-//     // if (picked != null) {
-//     //   _processDateSelection(picked);
-//     // }
-//   }
-//
-// }
-
 

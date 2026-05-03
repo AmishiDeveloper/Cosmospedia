@@ -146,7 +146,7 @@ class _FaqScreenState extends State<FaqScreen>
       'Space Data & Sources': AppColors.teal,
       'Customization & Settings': AppColors.errorDark,
       'Upcoming Features & Roadmap': AppColors.textDeepPurple,
-      'Need Additional HXCVBNM,./elp?': AppColors.purpleShade700,
+      'Need Additional Help?': AppColors.purpleShade700,
       // Purple like the support icons
     };
 

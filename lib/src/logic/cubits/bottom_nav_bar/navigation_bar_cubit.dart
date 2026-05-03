@@ -16,7 +16,6 @@ class NavigationBarCubit extends Cubit<NavigationBarState> {
   if(state is NavigationBarInitial)
   */
 
-
   //int index=0;
   /* no need to keep this line int index=0. cubits aim is to
   store the data inside state. when we do
@@ -28,6 +27,5 @@ class NavigationBarCubit extends Cubit<NavigationBarState> {
     debugPrint("index of the bottom nav is: $newIndex");
     emit(NavigationBarUpdateIndexState(index: newIndex));
   }
-
 
 }

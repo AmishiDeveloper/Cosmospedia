@@ -21,11 +21,6 @@ class SpaceContentCard extends StatelessWidget {
           context,
           AppRoute.slide(
             SpaceContentDetailScreen(content: content,),
-
-            // BlocProvider(
-            //   create: (context) => NavigationBarCubit(),
-            //   child: const NavigationBarScreen(),
-            // ),
           ),
         );
       },

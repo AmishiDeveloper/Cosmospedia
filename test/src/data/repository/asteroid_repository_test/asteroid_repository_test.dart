@@ -1,4 +1,3 @@
-import 'package:cosmospedia/src/core/utils/response_type_def.dart';
 import 'package:cosmospedia/src/data/model/asteroid_model/asteroid_feed_model.dart';
 import 'package:cosmospedia/src/data/model/asteroid_model/asteroid_lookup_model.dart';
 import 'package:cosmospedia/src/data/network/data_source/nasa/asteroid_api_service/asteroid_api_service.dart';

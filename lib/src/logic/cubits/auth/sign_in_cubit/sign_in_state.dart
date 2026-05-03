@@ -10,4 +10,3 @@ final class SignInErrorState extends SignInState {
   SignInErrorState({required this.errorMessage});
 }
 final class SignInSuccessState extends SignInState {}
-//final class TogglePasswordState extends SignInState {}

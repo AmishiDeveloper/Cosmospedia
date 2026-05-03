@@ -38,7 +38,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
                 // 2. Title (Screen ke ekdum center mein)
                 Center(
-                  child:CustomAppBar(title: 'Terms & Conditions'),
+                  child:CustomAppBar(title: 'Privacy Policy'),
                 ),
               ],
             ),

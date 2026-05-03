@@ -11,20 +11,6 @@ class SignUpCubit extends Cubit<SignUpState> {
 
   final _repo = getIt<AuthRepository>();
 
-  // bool isPasswordVisible= false;
-  //
-  // void togglePassword(bool passwordVisible){
-  //   isPasswordVisible= !passwordVisible;
-  //   emit(SignUpTogglePasswordState());
-  // }
-  //
-  // bool isConfirmPasswordVisible= false;
-  //
-  // void toggleConfirmPassword(bool confirmPasswordVisible){
-  //   isConfirmPasswordVisible= !confirmPasswordVisible;
-  //   emit(SignUpToggleConfirmPasswordState());
-  // }
-
   void signUpUser({
     required String name,
     required String email,

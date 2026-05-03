@@ -16,7 +16,6 @@ class MissDistanceCubit extends Cubit<MissDistanceState> {
     emit(MissDistanceSuccessState(closeApproachData: data, selectedApproach: data.first));
   }
 
-
   // Jab user dropdown se date badlega, ye function call hoga
   void updateApproach(CloseApproachDatum newApproach) {
     // Agar success state mein ho tabhi update karo
@@ -27,7 +26,4 @@ class MissDistanceCubit extends Cubit<MissDistanceState> {
           closeApproachData: currentData, selectedApproach: newApproach));
     }
   }
-
-
-
 }

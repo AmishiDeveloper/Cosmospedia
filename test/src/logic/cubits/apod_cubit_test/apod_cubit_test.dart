@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:bloc_test/bloc_test.dart';
 import 'package:cosmospedia/src/core/service_locator.dart';
 import 'package:cosmospedia/src/core/utils/response_type_def.dart';

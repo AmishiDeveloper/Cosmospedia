@@ -78,44 +78,10 @@ class _AsteroidTimelineViewScreenState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+
           SizedBox(height: 20.h),
 
-          ///velocity
-          // BlocProvider(
-          //   create: (context) =>
-          //   AsteroidVelocityCubit()
-          //     ..loadVelocityData(widget.lookupModel.closeApproachData ?? []),
-          //   child: BlocBuilder<AsteroidVelocityCubit, AsteroidVelocityState>(
-          //     // buildWhen: (previous, current) =>
-          //     // current is AsteroidDetailLoadingState ||
-          //     //     current is AsteroidDetailErrorState ||
-          //     //     current is AsteroidDetailSuccessState,
-          //     builder: (context, state) {
-          //       if (state is AsteroidVelocityLoadingState ||
-          //           state is AsteroidVelocityInitial) {
-          //         return asteroidVelocityLoadingWidget();
-          //       }
-          //       // else if (state is AsteroidVelocityErrorState) {
-          //       //   return CustomErrorWidget(
-          //       //     errorMessage: state.errorMessage,
-          //       //     onRetry: () {
-          //       //       context.read<AsteroidVelocityCubit>().fetchAsteroidLookupData(
-          //       //         asteroidId: widget.asteroid.id ?? "0",
-          //       //       ); // int.tryParse(widget.asteroid.id??'0')??0
-          //       //     },
-          //       //   );
-          //       if (state is AsteroidVelocitySuccessState) {
-          //         return AsteroidVelocityWidget(
-          //           closeApproachDatum:
-          //           widget.lookupModel.closeApproachData ?? [],
-          //         );
-          //       }
-          //       return const SizedBox.shrink();
-          //     },
-          //   ),
-          // ),
-
-
+          /// velocity
           BlocBuilder<AsteroidDetailCubit, AsteroidDetailState>(
             builder: (context, mainState) {
               if (mainState is AsteroidDetailLoadingState ||
@@ -165,25 +131,6 @@ class _AsteroidTimelineViewScreenState
           SizedBox(height: 15.h),
 
           ///miss distance
-          // BlocProvider(
-          //   create: (context) => MissDistanceCubit(data.first)..loadMissDistanceData(data),
-          //   child: BlocBuilder<MissDistanceCubit, MissDistanceState>(
-          //     builder: (context, state) {
-          //       if (state is MissDistanceLoadingState ||
-          //           state is MissDistanceInitial) {
-          //         return asteroidMissDistanceLoadingWidget();
-          //       }
-          //       if(state is MissDistanceSuccessState) {
-          //         return AsteroidMissDistanceBarGraphWidget(
-          //           closeApproachData: widget.lookupModel.closeApproachData ??
-          //               [],
-          //         );
-          //       }
-          //       return SizedBox.shrink();
-          //     },
-          //   ),
-          // ),
-
           BlocBuilder<AsteroidDetailCubit, AsteroidDetailState>(
             builder: (context, mainState) {
               if (mainState is AsteroidDetailLoadingState ||

@@ -13,7 +13,6 @@ class FaqCategory {
   });
 }
 
-
 class FaqItem {
   final String question;
   final String answer;
@@ -76,8 +75,7 @@ List<FaqCategory> generateFaqCategories() {
         FaqItem(
           question: 'Can I know about latest news, events, launches and missions going in space',
           answer: 'Yes. Easily:\n\n'
-              '• Navigate to space news section then choose the category for which you want latest updates about.\n'
-              '• Filter photos by camera type (e.g., Mastcam, Navcam)',
+              '• Navigate to space news section then choose the category for which you want latest updates about.\n',
         ),
         FaqItem(
           question: 'How do I access detailed asteroid information?',
@@ -121,7 +119,9 @@ List<FaqCategory> generateFaqCategories() {
         ),
         FaqItem(
           question: 'How can I report a bug or suggest a feature?',
-          answer: 'Navigate to the Help & Support section from the app menu to submit your feedback or report an issue.',
+          //answer: 'Navigate to the Help & Support section from the app menu to submit your feedback or report an issue.',
+          answer: 'Mail us on cosmospedia0720@gmail.com and submit your feedback or report an issue.',
+
         ),
       ],
     ),
@@ -192,8 +192,8 @@ List<FaqCategory> generateFaqCategories() {
         FaqItem(
           question: 'How can I contact support?',
           answer: 'For further assistance, feedback, or support, feel free to reach out:\n\n'
-              '• Email: support@cosmospedia.com\n'
-              '• In-App: Navigate to Help & Support via the app\'s main menu',
+              '• Email: cosmospedia0720@gmail.com\n'
+             // '• In-App: Navigate to Help & Support via the app\'s main menu',
         ),
       ],
     ),

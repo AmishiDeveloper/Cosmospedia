@@ -2,9 +2,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cosmospedia/src/core/app_themes/app_colors.dart';
 import 'package:cosmospedia/src/core/app_themes/text_styles.dart';
 import 'package:cosmospedia/src/data/model/space_news_models/space_news_common_model/space_news_common_interface.dart';
-import 'package:cosmospedia/src/data/model/space_news_models/space_event_model.dart' as events;
-import 'package:cosmospedia/src/data/model/space_news_models/space_launches_model.dart' as launches;
-import 'package:cosmospedia/src/data/model/space_news_models/space_news_missions_model.dart' as news_missions;
+import 'package:cosmospedia/src/data/model/space_news_models/space_event_model.dart'
+    as events;
+import 'package:cosmospedia/src/data/model/space_news_models/space_launches_model.dart'
+    as launches;
+import 'package:cosmospedia/src/data/model/space_news_models/space_news_missions_model.dart'
+    as news_missions;
 import 'package:cosmospedia/src/data/repository/space_dev_repo/space_news_repo/space_news_repository.dart';
 import 'package:cosmospedia/src/presentation/widgets/custom_background_widget.dart';
 import 'package:cosmospedia/src/presentation/widgets/custom_snack_bar.dart';
@@ -31,7 +34,10 @@ class SpaceContentDetailScreen extends StatelessWidget {
               leading: Padding(
                 padding: EdgeInsets.all(8.w),
                 child: IconButton(
-                  icon:  Icon(Icons.arrow_back_ios_rounded, color: AppColors.greyShimmerShade600),
+                  icon: Icon(
+                    Icons.arrow_back_ios_rounded,
+                    color: AppColors.greyShimmerShade600,
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
               ),
@@ -48,11 +54,11 @@ class SpaceContentDetailScreen extends StatelessWidget {
                     errorWidget: (context, url, error) => Container(
                       color: AppColors.greyShimmer,
                       child: const Icon(
-                          Icons.broken_image,
-                          color: AppColors.greyShimmer,
+                        Icons.broken_image,
+                        color: AppColors.greyShimmer,
                       ),
                     ),
-                  )
+                  ),
                 ),
               ),
             ),
@@ -67,35 +73,52 @@ class SpaceContentDetailScreen extends StatelessWidget {
                     // Badge & Source
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _buildBadge(context),
-
-                      ],
+                      children: [_buildBadge(context)],
                     ),
                     SizedBox(height: 15.h),
 
                     // Title
-                    Center(child: Text(content.titleValue, style: AppTextStyles.headingMediumStyle(context),textAlign: TextAlign.center,)),
+                    Center(
+                      child: Text(
+                        content.titleValue,
+                        style: AppTextStyles.headingMediumStyle(context),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                     SizedBox(height: 10.h),
 
-                    Text("Source: ${content.newsSiteValue}", style: AppTextStyles.descriptionLargeTextStyle(context).copyWith(color: AppColors.greyShimmerShade300),),
+                    Text(
+                      "Source: ${content.newsSiteValue}",
+                      style: AppTextStyles.descriptionLargeTextStyle(
+                        context,
+                      ).copyWith(color: AppColors.greyShimmerShade300),
+                    ),
 
                     SizedBox(height: 10.h),
                     // Date
-                    Text("Published: ${content.formattedDate}",
-                        style: AppTextStyles.descriptionLargeTextStyle(context).copyWith(color: AppColors.greyShimmerShade300),),
+                    Text(
+                      "Published: ${content.formattedDate}",
+                      style: AppTextStyles.descriptionLargeTextStyle(
+                        context,
+                      ).copyWith(color: AppColors.greyShimmerShade300),
+                    ),
 
-                    const Divider(height: 40,thickness: 2,),
+                    const Divider(height: 40, thickness: 2),
 
                     // --- EXTRA DETAILS (Type Specific) ---
                     _buildExtraSection(context),
 
                     // Summary / Description
-                    Text("Overview", style: AppTextStyles.subHeadingLargeStyle(context)),
+                    Text(
+                      "Overview",
+                      style: AppTextStyles.subHeadingLargeStyle(context),
+                    ),
                     SizedBox(height: 10.h),
                     Text(
                       content.summaryValue,
-                      style: AppTextStyles.bodyTextStyle(context).copyWith(height: 1.5),
+                      style: AppTextStyles.bodyTextStyle(
+                        context,
+                      ).copyWith(height: 1.5),
                       softWrap: true,
                     ),
 
@@ -110,11 +133,19 @@ class SpaceContentDetailScreen extends StatelessWidget {
       // Floating Action Button for News Link
       floatingActionButton: content.typeValue == 'news'
           ? FloatingActionButton.extended(
-        onPressed: () => _openUrl(context),
-        label: Text("Read More",style: AppTextStyles.bodyTextStyle(context).copyWith(fontWeight: FontWeight.bold),),
-        icon: const Icon(Icons.open_in_new,color: AppColors.surfaceLight,),
-        backgroundColor: AppColors.primaryDark,
-      )
+              onPressed: () => _openUrl(context),
+              label: Text(
+                "Read More",
+                style: AppTextStyles.bodyTextStyle(
+                  context,
+                ).copyWith(fontWeight: FontWeight.bold),
+              ),
+              icon: const Icon(
+                Icons.open_in_new,
+                color: AppColors.surfaceLight,
+              ),
+              backgroundColor: AppColors.primaryDark,
+            )
           : null,
     );
   }
@@ -129,28 +160,33 @@ class SpaceContentDetailScreen extends StatelessWidget {
           //     context, icon:Icons.info_outline, title:"Launch Status",
           //     subtitle: "${data.status?.name?.name ?? 'N/A'}\n${data.status?.abbrev ?? 'N/A'}"
           // ),
-
           if (data.failreason != null && data.failreason!.isNotEmpty)
             _extraInfoTile(
-                context, icon:Icons.error_outline, title: "Failure Reason", subtitle:data.failreason!, isError: true,
+              context,
+              icon: Icons.error_outline,
+              title: "Failure Reason",
+              subtitle: data.failreason!,
+              isError: true,
             ),
 
           _extraInfoTile(
-              context, icon:Icons.rocket_launch, title: "Mission Info",
-              subtitle: "Type: ${data.mission?.name ?? 'N/A'}"),
+            context,
+            icon: Icons.rocket_launch,
+            title: "Mission Info",
+            subtitle: "Type: ${data.mission?.name ?? 'N/A'}",
+          ),
 
           // _extraInfoTile(context, icon:Icons.place, title: "Launch Site",
           //     subtitle: "Pad: ${data.pad?.name?.name ?? 'N/A'}\nCountry: ${data.pad?.location?.name?.name ?? 'Unknown'}"),
 
-    // _extraInfoTile(
-    // context,
-    // icon: Icons.rocket_launch,
-    // title: "Rocket & Status",
-    // subtitle: "Status: ${data.status?.name?.name ?? 'Unknown'}\nPad: ${data.pad?.name?.name ?? 'N/A'}",
-    // ),
+          // _extraInfoTile(
+          // context,
+          // icon: Icons.rocket_launch,
+          // title: "Rocket & Status",
+          // subtitle: "Status: ${data.status?.name?.name ?? 'Unknown'}\nPad: ${data.pad?.name?.name ?? 'N/A'}",
+          // ),
         ],
       );
-
     }
 
     // 2. Case for Events
@@ -177,29 +213,55 @@ class SpaceContentDetailScreen extends StatelessWidget {
     return const SizedBox.shrink();
   }
 
-  Widget _extraInfoTile(BuildContext context, {required IconData icon, required String title, required String subtitle, bool isError = false}) {
+  Widget _extraInfoTile(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    bool isError = false,
+  }) {
     return Container(
       margin: EdgeInsets.only(bottom: 25.h),
       padding: EdgeInsets.all(15.w),
       decoration: BoxDecoration(
-        color: isError ? Colors.red.withOpacity(0.1) : AppColors.surfaceLight.withOpacity(0.4),
+        color: isError
+            ? Colors.red.withOpacity(0.1)
+            : AppColors.surfaceLight.withOpacity(0.4),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.surfaceLight)
+        border: Border.all(color: AppColors.surfaceLight),
       ),
       child: Row(
         children: [
-          Icon(icon, color: isError ? AppColors.error :AppColors.primaryDark, size: 30.h),
+          Icon(
+            icon,
+            color: isError ? AppColors.error : AppColors.primaryDark,
+            size: 30.h,
+          ),
           SizedBox(width: 15.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: AppTextStyles.descriptionLargeTextStyle(context).copyWith(fontWeight: FontWeight.bold,color: AppColors.black),),
+                Text(
+                  title,
+                  style: AppTextStyles.descriptionLargeTextStyle(context)
+                      .copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.black,
+                      ),
+                ),
                 SizedBox(height: 5.h),
-                Text(subtitle, style:  AppTextStyles.descriptionSmallTextStyle(context).copyWith(fontWeight: FontWeight.bold,color: AppColors.greyShimmerShade800),),
+                Text(
+                  subtitle,
+                  style: AppTextStyles.descriptionSmallTextStyle(context)
+                      .copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.greyShimmerShade800,
+                      ),
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -212,7 +274,10 @@ class SpaceContentDetailScreen extends StatelessWidget {
         color: _getCategoryColor(content.typeValue),
         borderRadius: BorderRadius.circular(5.r),
       ),
-      child: Text(content.typeValue.toUpperCase(), style: AppTextStyles.smallTextStyle(context),),
+      child: Text(
+        content.typeValue.toUpperCase(),
+        style: AppTextStyles.smallTextStyle(context),
+      ),
     );
   }
 
@@ -227,10 +292,14 @@ class SpaceContentDetailScreen extends StatelessWidget {
           if (await canLaunchUrl(uri)) {
             await launchUrl(
               uri,
-              mode: LaunchMode.externalApplication, // Ye Android 11+ ke liye best hai
+              mode: LaunchMode
+                  .externalApplication, // Ye Android 11+ ke liye best hai
             );
           } else {
-            showCustomSnackBar(context: context, message: "Could not launch article");
+            showCustomSnackBar(
+              context: context,
+              message: "Could not launch article",
+            );
           }
         } catch (e) {
           showCustomSnackBar(context: context, message: "Error: $e");
@@ -244,7 +313,8 @@ class SpaceContentDetailScreen extends StatelessWidget {
       enabled: true,
       effect: ShimmerEffect(
         baseColor: AppColors.greyShimmerShade400,
-        highlightColor: AppColors.surfaceLight.withOpacity(0.5),//greyShimmerShade100,
+        highlightColor: AppColors.surfaceLight.withOpacity(0.5),
+        //greyShimmerShade100,
         duration: const Duration(milliseconds: 1000),
       ),
       // child: Container(
@@ -255,7 +325,7 @@ class SpaceContentDetailScreen extends StatelessWidget {
       //     borderRadius: BorderRadius.vertical(top: Radius.circular(15.r)),
       //   ),
       // ),
-      child:Bone( // <--- Container ki jagah Bone use karo
+      child: Bone(
         width: double.infinity,
         height: 200.h,
         borderRadius: BorderRadius.vertical(top: Radius.circular(15.r)),
