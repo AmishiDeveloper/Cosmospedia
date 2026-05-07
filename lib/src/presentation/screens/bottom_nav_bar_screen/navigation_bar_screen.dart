@@ -34,7 +34,7 @@ class NavigationBarScreen extends StatelessWidget {
           cubit.updateIndex(0);
         } else {
           //  Aapka Custom Cosmos Dialog Call ho raha hai
-          bool shouldExit = false;
+          //bool shouldExit = false;
 
           await showCustomCosmosDialog(
             context,
@@ -74,8 +74,9 @@ class NavigationBarScreen extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        shouldExit = true;
-                        Navigator.pop(context); // Close dialog
+                        //shouldExit = true;
+                        //Navigator.pop(context); // Close dialog
+                        SystemNavigator.pop();
                       },
                       child: Text(
                         'Yes',
@@ -90,9 +91,9 @@ class NavigationBarScreen extends StatelessWidget {
             ),
           );
 
-          if (shouldExit) {
-            SystemNavigator.pop(); // App band
-          }
+          // if (shouldExit) {
+          //   SystemNavigator.pop(); // App band
+          // }
         }
       },
       child: Scaffold(
