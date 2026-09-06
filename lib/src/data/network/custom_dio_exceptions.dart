@@ -48,7 +48,7 @@ class CustomDioExceptions implements Exception {
   }
 
   String _handleStatusError(int? statusCode, dynamic error) {
-    // 1. Pehle ye check karo ki 'error' null toh nahi ya Map hai ya nahi
+    // 1. Pehle ye check karo ki 'error' null na ho aur Map ho
     String? serverMessage;
     if (error != null && error is Map) {
       serverMessage = error["message"]?.toString() ?? error["error"]?.toString();
