@@ -20,7 +20,11 @@ class ApodApiService extends NasaApiService {
 
   //Future<dynamic>: Iska matlab hai ki ye kaam "Future" mein poora hoga (internet slow ho sakta hai ya kaam karne mein time lag sakta h), tab tak app ko wait karna padega.
   // fetch apod data
-  Future<dynamic> fetchApodData({int? count, String? start, String? end}) async {
+  Future<dynamic> fetchApodData({
+    int? count,
+    String? start,
+    String? end,
+  }) async {
 
     // 'get' method is defined in the DioClient class now cant directly use get method because the ApiService class does not extend the DioClient Class
     // only creates a reference of DioClient class which gets initialized by the NasaApiService class when through its constructor super i.e ApiService constructor is called and
@@ -28,14 +32,42 @@ class ApodApiService extends NasaApiService {
     // ApiService class then the ApodApiService that extended the NasaApiService class would be able to use the get method directly since child class can use parent class
     // properties but since DioCient is not extended and its reference is created api.get() has to be used
 
+    Map<String, dynamic> queryParams = {};
+
+    // CASE 1: Carousel / Random request
+    if (count != null) {
+      // 15 items so that after local shuffle random apod are shown
+      queryParams['per_page'] = 15;
+    }
+    // CASE 2: Single Date (Same Start & End)
+    else if (start != null && end != null && start == end) {
+      queryParams['before'] = end;
+      queryParams['after'] = start;
+      queryParams['per_page'] = 1;
+    }
+    // CASE 3: Date Range
+    else if (start != null && end != null) {
+      DateTime startDt = DateTime.parse(start);
+      DateTime endDt = DateTime.parse(end);
+
+      // Calculate exact number of days
+      int totalDays = endDt.difference(startDt).inDays + 1;
+
+      queryParams['before'] = end;
+      queryParams['after'] = start;
+      queryParams['per_page'] = totalDays; // Utne hi items maango jitne din hain!
+    }
+
+
     var response= await api.get(
       Endpoints.apod,
-      queryParameters: {
-        'api_key': Endpoints.nasaApiKey,
-        if (count != null) 'count': count,
-        if (start != null) 'start_date': start,
-        if (end != null) 'end_date': end,
-      },
+      // queryParameters: {
+      //   if (count != null) 'count': count,
+      //   if (start != null) 'start_date': start,
+      //   if (end != null) 'end_date': end,
+      //   'api_key': "DEMO_KEY",//Endpoints.nasaApiKey,
+      // },
+      queryParameters: queryParams,
     );
     return response; // this response in json format is give to the repository that will call this fetchApodData() method. here ApodRepository calls this function
   }

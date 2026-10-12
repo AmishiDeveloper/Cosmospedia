@@ -78,7 +78,7 @@ class ApodGridWidget extends StatelessWidget {
                       // ),
 
                       child:CachedNetworkImage(
-                        imageUrl: item.url ?? '',
+                        imageUrl: item.displayImageUrl,//item.url ?? '',
                         fit: BoxFit.cover,
                         memCacheHeight: 400,
                         memCacheWidth: 800,

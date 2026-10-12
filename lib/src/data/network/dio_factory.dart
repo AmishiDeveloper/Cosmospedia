@@ -18,6 +18,18 @@ class DioFactory {
   }
 
   /*Creates a new Dio instance
+  Sets the baseUrl to NASA Science APOD API
+  Returns that Dio*/
+  static Dio nasaScience() {
+    return Dio(
+      BaseOptions(
+        baseUrl: Endpoints.nasaScienceBaseUrl,
+      ),
+    );
+  }
+
+
+  /*Creates a new Dio instance
   Configured only for SpaceFlight API
   Returns it*/
   static Dio spaceFlightNewsApi() {

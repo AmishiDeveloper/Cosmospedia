@@ -467,7 +467,7 @@ class _ApodScreenState extends State<ApodScreen> {
                     tag: 'carousel_${item.date}',
                     child: CachedNetworkImage(
                       fit: BoxFit.cover,
-                      imageUrl: item.url ?? '',
+                      imageUrl: item.displayImageUrl,//item.url ?? '',
                       width: double.infinity,
                       placeholder: (context, url) => buildImagePlaceholder(),
                       errorWidget: (context, url, error) =>
@@ -659,7 +659,7 @@ class _ApodScreenState extends State<ApodScreen> {
       //   ),
       // ),
       child: Bone(
-        // <--- Container ki jagah Bone use karo
+        //  Container ki jagah Bone use karo
         width: double.infinity,
         height: 200.h,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),

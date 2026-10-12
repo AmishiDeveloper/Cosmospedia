@@ -73,6 +73,18 @@ class ServiceLocator {
       instanceName: 'nasaClient',
     );
 
+
+    getIt.registerSingleton<Dio>(
+      DioFactory.nasaScience(),
+      instanceName: 'nasaScience',
+    );
+
+    getIt.registerSingleton<DioClient>(
+      DioClient(getIt<Dio>(instanceName: 'nasaScience')),
+      instanceName: 'nasaScience',
+    );
+
+
     /*SpaceFlight API
     Register a Dio instance specifically configured for spaceFlightNews API
     - Created using DioFactory.theSpaceFlightNews()
@@ -133,7 +145,8 @@ class ServiceLocator {
     getIt.registerSingleton<FirebaseFirestore>(FirebaseFirestore.instance);
 
     //apod
-    getIt.registerSingleton(ApodApiService(getIt<DioClient>(instanceName: 'nasaClient')));
+    //getIt.registerSingleton(ApodApiService(getIt<DioClient>(instanceName: 'nasaClient')));
+    getIt.registerSingleton(ApodApiService(getIt<DioClient>(instanceName: 'nasaScience')));
 
     //asteroid
     getIt.registerSingleton(AsteroidApiService(getIt<DioClient>(instanceName: 'nasaClient')));

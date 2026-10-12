@@ -37,52 +37,6 @@ class ApodRepository {
   ApodRepository(this._apodApiService);
 
   /// Fetch apod data
-  // // FutureResult: Iska matlab hai ki result do cheezon mein se ek hoga: CustomError ya List<ApodModel>.
-  // FutureResult<List<ApodModel>> fetchApodList(
-  //     {int? count, String? startDate, String? endDate}) async {
-  //
-  //   //try { ... } on DioException catch (e) { ... }
-  //   //Internet se data mangwana khatarnak ho sakta hai. try matlab "Koshish karo", aur agar crash ho (jaise internet band ho), toh catch use sambhaal lega taaki app band na ho.
-  //
-  //   try {
-  //     var response = await _apodApiService.fetchApodData(
-  //       count: count,
-  //       start: startDate,
-  //       end: endDate,
-  //     );
-  //
-  //     //Data Conversion (JSON to Model)
-  //     //NASA kabhi ek image bhejta hai (Map) aur kabhi 5 images (List of map).
-  //     final data = response.data;
-  //
-  //     /*
-  //     If data is List: Matlab bahut saari images hain. Har ek json ko uthao aur ApodModel.fromJson
-  //     ke machine mein daal kar Model bana do.
-  //     */
-  //     if (data is List) {
-  //       final List<ApodModel> models = data.map((json) => ApodModel.fromJson(json)).toList();
-  //       return right(models);
-  //     }
-  //     else { //Else: Matlab sirf ek image aayi hai. Use bhi list mein daal kar bhej do taaki UI ko hamesha list hi mile.
-  //       final ApodModel model = ApodModel.fromJson(data);
-  //       return right([model]);
-  //     }
-  //     // final model = apodModelFromJson(response.toString());
-  //     // return right(model);
-  //
-  //
-  //     /*Agar error aaya (jaise 404 ya No Internet), toh hum ganda sa technical error nahi dikhayenge.
-  //     CustomDioExceptions class will convert the error into easy language (jaise 'No Internet')"*/
-  //   } on DioException catch (e) {
-  //     String customException = CustomDioExceptions
-  //         .fromDioException(e)
-  //         .toString();
-  //     CustomError error = CustomError(customException, e.response?.statusCode);
-  //     // error is packed on the left and returned
-  //     return left(error);
-  //   }
-  // }
-
   FutureResult<List<ApodModel>> fetchApodList({
     int? count,
     String? startDate,
@@ -106,10 +60,30 @@ class ApodRepository {
         final List<ApodModel> models = data
             .map((json) => ApodModel.fromJson(json as Map<String, dynamic>))
             .toList();
+        // random apod for carousel
+        if (count != null) {
+          models.shuffle();
+          return right(models.take(count).toList());
+        }
+
+        // Strict Date Filtering
+        if (startDate != null && endDate != null) {
+          DateTime startDt = DateTime.parse(startDate);
+          DateTime endDt = DateTime.parse(endDate);
+
+          final filtered = models.where((apod) {
+            if (apod.date == null) return false;
+            return (apod.date!.isAfter(startDt) || apod.date!.isAtSameMomentAs(startDt)) &&
+                (apod.date!.isBefore(endDt) || apod.date!.isAtSameMomentAs(endDt));
+          }).toList();
+
+          return right(filtered);
+        }
+
         return right(models);
       }
 
-      //3. Phir Map check karo (Single date calls ke liye).Map Parsing (Jab single image aati hai)
+      // 2. Map Parsing (Legacy fallback if any case gets single JSON map)
       if (data is Map<String, dynamic>) { //  Direct Map check
         final model = ApodModel.fromJson(data);
         return right([model]);

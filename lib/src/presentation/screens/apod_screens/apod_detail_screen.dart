@@ -7,6 +7,8 @@ import 'package:cosmospedia/src/presentation/widgets/custom_background_widget.da
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ApodDetailScreen extends StatelessWidget {
   final ApodModel item; //Isme us specific photo ki saari details hain (Title, Explanation, HD URL).
@@ -54,13 +56,17 @@ class ApodDetailScreen extends StatelessWidget {
                   // ),
                   child:CachedNetworkImage(
                     fit: BoxFit.cover,
-                    imageUrl:item.hdurl ?? item.url ?? 'https://www.shutterstock.com/image-vector/page-404-error-spaceman-flag-260nw-1484690978.jpg',
+                    imageUrl:item.displayImageUrl.isNotEmpty
+                        ? item.displayImageUrl
+                        : 'https://www.shutterstock.com/image-vector/page-404-error-spaceman-flag-260nw-1484690978.jpg', //item.hdurl ?? item.url ?? 'https://www.shutterstock.com/image-vector/page-404-error-spaceman-flag-260nw-1484690978.jpg',
                     width: double.infinity,
                     memCacheHeight: 400,
                     memCacheWidth: 800,
                     placeholder: (context, url) =>
                         CachedNetworkImage(
-                          imageUrl: item.url ?? '',
+                          imageUrl: item.displayImageUrl.isNotEmpty
+                              ? item.displayImageUrl
+                              : 'https://www.shutterstock.com/image-vector/page-404-error-spaceman-flag-260nw-1484690978.jpg',//item.url ?? '',
                           fit: BoxFit.cover,
                           width: double.infinity,
                           memCacheHeight: 400,
@@ -144,13 +150,37 @@ class ApodDetailScreen extends StatelessWidget {
                         ),
                         if (item.copyright != null)
                           Flexible( //Flexible (Copyright): Agar kisi ka naam bahut bada hai, toh app crash nahi hogi, text agali line par aa jayega ya "..." dikhayega.
-                            child: Text(
+                            // child: Text(
+                            //   "© ${item.copyright!.trim()}",
+                            //   style: AppTextStyles.descriptionSmallTextStyle(context).copyWith(
+                            //     color: AppColors.surfaceLight.withOpacity(0.5),
+                            //     fontStyle: FontStyle.italic,
+                            //   ),
+                            //   overflow: TextOverflow.ellipsis,
+                            // ),
+                            child:HtmlWidget(
                               "© ${item.copyright!.trim()}",
-                              style: AppTextStyles.descriptionSmallTextStyle(context).copyWith(
-                                color: AppColors.surfaceLight.withOpacity(0.5),
+                              onTapUrl: (url) async {
+                                final uri = Uri.tryParse(url);
+                                if (uri != null && await canLaunchUrl(uri)) {
+                                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                  return true;
+                                }
+                                return false;
+                              },
+                              textStyle: AppTextStyles.descriptionSmallTextStyle(context).copyWith(
+                                color: AppColors.surfaceLight.withOpacity(0.6),
                                 fontStyle: FontStyle.italic,
                               ),
-                              overflow: TextOverflow.ellipsis,
+                              customStylesBuilder: (element) {
+                                if (element.localName == 'a') {
+                                  return {
+                                    'color': '#80D8FF',
+                                    'text-decoration': 'underline',
+                                  };
+                                }
+                                return null;
+                              },
                             ),
                           ),
                       ],
@@ -164,25 +194,56 @@ class ApodDetailScreen extends StatelessWidget {
                     SizedBox(height: 20.h),
 
                     // Explanation Header
-                    Text(
-                      "Explanation",
-                      style: AppTextStyles.headingSmallStyle(context).copyWith(
-                        color: AppColors.surfaceLight,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    SizedBox(height: 12.h),
+                    // Text(
+                    //   "Explanation",
+                    //   style: AppTextStyles.headingSmallStyle(context).copyWith(
+                    //     color: AppColors.surfaceLight,
+                    //     fontWeight: FontWeight.bold,
+                    //   ),
+                    // ),
+                    //
+                    // SizedBox(height: 12.h),
 
                     // Actual Explanation Text
-                    Text(
-                      item.explanation ?? 'No description available for this cosmic event.',
-                      textAlign: TextAlign.justify,
-                      style: AppTextStyles.descriptionLargeTextStyle(context).copyWith(
+                    // Text(
+                    //   item.explanation ?? 'No description available for this cosmic event.',
+                    //   textAlign: TextAlign.justify,
+                    //   style: AppTextStyles.descriptionLargeTextStyle(context).copyWith(
+                    //     color: AppColors.surfaceLight.withOpacity(0.9),
+                    //     height: 1.6, // Reading ease ke liye line height. Line spacing badhayi gayi hai taaki badi explanation padhne mein aankhon par zor na pade.
+                    //     fontSize: 15.sp,
+                    //   ),
+                    // ),
+                    HtmlWidget(
+                      (item.explanation ?? 'No description available for this cosmic event.'),
+                      onTapUrl: (url) async {
+                        final uri = Uri.tryParse(url);
+                        if (uri != null && await canLaunchUrl(uri)) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                          return true;
+                        }
+                        return false;
+                      },
+                      textStyle: AppTextStyles.descriptionLargeTextStyle(context).copyWith(
                         color: AppColors.surfaceLight.withOpacity(0.9),
-                        height: 1.6, // Reading ease ke liye line height. Line spacing badhayi gayi hai taaki badi explanation padhne mein aankhon par zor na pade.
+                        height: 1.6,
                         fontSize: 15.sp,
                       ),
+                      customStylesBuilder: (element) {
+                        // Links ko cyan/blue underline look dein
+                        if (element.localName == 'a') {
+                          return {
+                            'color': '#80D8FF',
+                            'text-decoration': 'underline',
+                            'font-weight': '600',
+                          };
+                        }
+                        // Bold tags (jaise <strong>Explanation:</strong>) ko bright white look dein
+                        if (element.localName == 'strong') {
+                          return {'color': '#FFFFFF'};
+                        }
+                        return null;
+                      },
                     ),
 
                     SizedBox(height: 50.h), // Bottom padding

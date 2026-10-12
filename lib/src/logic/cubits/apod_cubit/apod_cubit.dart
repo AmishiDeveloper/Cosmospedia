@@ -60,7 +60,7 @@ class ApodCubit extends Cubit<ApodState> {
     List<ApodModel> carouselList = [];
     carouselResponse.fold((error) {
       if (cachedState != null) carouselList = cachedState.apodCarouselImageList;
-    }, (list) => carouselList = list);
+    }, (list) => carouselList = list.take(5).toList()); //carouselList = list
 
     await todayApodResponse.fold(
           (error) async {
@@ -382,7 +382,7 @@ class ApodCubit extends Cubit<ApodState> {
       (error) => null,
       // Fail hua toh kuch mat karo, UI already error dikha rahi hogi
       (newList) {
-        _emitSuccess(currentState.copyWith(apodCarouselImageList: newList));
+        _emitSuccess(currentState.copyWith(apodCarouselImageList: newList.take(5).toList())); //apodCarouselImageList: newList
       },
     );
   }
